@@ -6,42 +6,19 @@ require 'oj'
 
 module Hulse
   class Utils
-    
-    CONGRESSES = {
-      2014 => 113,
-      2013 => 113,
-      2012 => 112,
-      2011 => 112,
-      2010 => 111,
-      2009 => 111,
-      2008 => 110,
-      2007 => 110,
-      2006 => 109,
-      2005 => 109,
-      2004 => 108,
-      2003 => 108,
-      2002 => 107,
-      2001 => 107,
-      2000 => 106,
-      1999 => 106,
-      1998 => 106,
-      1997 => 105,
-      1996 => 105,
-      1995 => 104,
-      1994 => 104,
-      1993 => 103,
-      1992 => 103,
-      1991 => 102,
-      1990 => 102,
-      1989 => 101
-    }
-    
+
+    # this function is more intuitive when you solve for the other side:
+    # year = 1789 + (2 * (congress - 1))
+    def self.congress_for_year(year)
+      ((year.to_i + 1) / 2) - 894
+    end
+
     def self.convert_year_to_congress_and_session(year)
-      congress = CONGRESSES[year]
+      congress = congress_for_year year
       session = year.odd? ? 1 : 2
       return [congress, session]
     end
-    
-    
+
+
   end
 end
