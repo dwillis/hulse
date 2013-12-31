@@ -1,21 +1,21 @@
 module Hulse
   class HouseVote
-    
+
     attr_reader :majority, :congress, :session, :chamber, :vote_number, :bill_number, :question, :vote_type, :vote_result, :vote_timestamp, :description,
     :party_summary, :vote_count, :members, :amendment_number, :amendment_author
-    
+
     def initialize(params={})
       params.each_pair do |k,v|
         instance_variable_set("@#{k}", v)
       end
-    end    
+    end
 
     def self.find(year, vote)
-      url = "http://clerk.house.gov/evs/#{year.to_s}/roll#{vote}.xml"
+      url = "http://clerk.house.gov/evs/#{year.to_s}/roll#{vote.to_s.rjust(3,"0")}.xml"
       response = HTTParty.get(url)
       self.create_from_vote(response.parsed_response['rollcall_vote'])
     end
-    
+
     def self.create_from_vote(response)
       party_totals = []
       response['vote_metadata']['vote_totals']['totals_by_party'].each do |p|
