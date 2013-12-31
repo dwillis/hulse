@@ -1,6 +1,6 @@
 # Hulse
 
-Hulse is a Ruby gem for accessing House and Senate roll call votes from the official sources on [house.gov](http://clerk.house.gov/evs/2013/index.asp) and [senate.gov](http://www.senate.gov/pagelayout/legislative/a_three_sections_with_teasers/votes.htm). It is developed under Ruby 1.9.3.
+Hulse is a Ruby gem for accessing House and Senate roll call votes from the official sources on [house.gov](http://clerk.house.gov/evs/2013/index.asp) and [senate.gov](http://www.senate.gov/pagelayout/legislative/a_three_sections_with_teasers/votes.htm). It works using Ruby 1.9.3 and 2.0.0.
 
 Hulse has two classes, `HouseVote` and `SenateVote`, which create Ruby objects using the XML attributes available from roll call vote data (voice votes are not covered by Hulse or available as data from official sources). Hulse makes a few changes, renaming some attributes for clarity and consistency, and collapsing each House vote's date and time into a single datetime attribute. Otherwise it does not alter the original data.
 
