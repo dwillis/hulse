@@ -41,8 +41,7 @@ module Hulse
         :vote_count => response['count'].inject({}){|memo,(k,v)| memo[k.to_sym] = v; memo},
         :tie_breaker => response['tie_breaker'].inject({}){|memo,(k,v)| memo[k.to_sym] = v; memo},
         :members => members
-      )
-      
+      )  
     end
     
     
