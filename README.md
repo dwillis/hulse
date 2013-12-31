@@ -6,6 +6,8 @@ Hulse has two classes, `HouseVote` and `SenateVote` which create Ruby objects us
 
 `HouseVote` and `SenateVote` have different attributes due to parliamentary conventions and the presence or absence of data in one chamber or the other. Senators are uniquely identified by a `lis_member_id`; House members are uniquely identified by a `bioguide_id` beginning in 2003. Prior to 2003, there is no unique ID for House members, but using a combination of name, state and political party one can be manfactured. House member attributes also include an `unaccented_name` and an `name` attribute that may contain accent characters.
 
+Hulse is named for Carl Hulse, a longtime congressional correspondent for The New York Times.
+
 ## Installation
 
 Add this line to your application's Gemfile:
