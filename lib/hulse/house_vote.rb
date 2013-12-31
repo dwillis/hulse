@@ -11,7 +11,7 @@ module Hulse
     end
 
     def self.find(year, vote)
-      url = "http://clerk.house.gov/evs/#{year}/roll#{vote}.xml"
+      url = "http://clerk.house.gov/evs/#{year.to_s}/roll#{vote.to_s.rjust(3,"0")}.xml"
       response = HTTParty.get(url)
       self.create_from_vote(response.parsed_response['rollcall_vote'])
     end
