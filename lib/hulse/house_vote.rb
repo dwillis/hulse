@@ -2,7 +2,7 @@ module Hulse
   class HouseVote
     
     attr_reader :majority, :congress, :session, :chamber, :vote_number, :bill_number, :question, :vote_type, :vote_result, :vote_timestamp, :description,
-    :party_summary, :vote_count, :members
+    :party_summary, :vote_count, :members, :amendment_number, :amendment_author
     
     def initialize(params={})
       params.each_pair do |k,v|
@@ -25,9 +25,8 @@ module Hulse
       mappings = {"__content__" => "name"}
       response['vote_data']['recorded_vote'].each do |m|
         m['legislator']['name'] = m['legislator'].delete('__content__')
-        m['legislator']['bioguide_id'] = m['legislator'].delete('name_id')
+        m['legislator']['bioguide_id'] = m['legislator'].delete('name_id') # prior to 2003, bioguide IDs were not used in the XML
         m['legislator']['vote'] = m['vote']
-        m['legislator'].reject{|k,v| k == 'role'}        
         members << m['legislator'].inject({}){|memo,(k,v)| memo[k.to_sym] = v; memo}
       end
       self.new(:majority => response['vote_metadata']['majority'],
@@ -37,6 +36,8 @@ module Hulse
         :vote_number => response['vote_metadata']['rollcall_num'].to_i,
         :bill_number => response['vote_metadata']['legis_num'],
         :question => response['vote_metadata']['vote_question'],
+        :amendment_number => response['vote_metadata']['amendment_num'],
+        :amendment_author => response['vote_metadata']['amendment_author'],
         :vote_type => response['vote_metadata']['vote_type'],
         :vote_result => response['vote_metadata']['vote_result'],
         :vote_timestamp => DateTime.parse(response['vote_metadata']['action_date'] + ' ' + response['vote_metadata']['action_time']['time_etz']),
