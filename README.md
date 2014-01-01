@@ -27,16 +27,24 @@ Or install it yourself as:
 For both House and Senate votes, pass the year and roll call number into the `find` class method:
 
 ```ruby
-1.9.3-p484> require 'hulse'
-1.9.3-p484> include Hulse
-1.9.3-p484> hv = HouseVote.find(2013, 628)
-1.9.3-p484> hv.question
+2.0.0p353 :001 > require 'hulse'
+2.0.0p353 :002 > include Hulse
+2.0.0p353 :003 > hv = HouseVote.find(2013, 628)
+2.0.0p353 :004 > hv.question
  => "On Agreeing to the Amendment"
- 1.9.3-p484> hv.vote_count
+2.0.0p353 :005 > hv.vote_count
   => {:yea_total=>157, :nay_total=>258, :present_total=>0, :not_voting_total=>16}
 ```
 
 Be aware that in 2012, there were 5 House votes that occurred on Jan. 1, 2013. These are considered "2012" votes by [the Clerk of the House](http://clerk.house.gov/evs/2012/index.asp), so use 2012 as the year for these.
+
+For Senate votes, you can grab a year's SenateVote objects (with a limited set of attributes) by using the `summary` method:
+
+```ruby
+2.0.0p353 :006 > senate_2013 = SenateVote.summary(2013)
+2.0.0p353 :007 > senate_2013.first
+=> #<Hulse::SenateVote:0x000001017f0d58 @congress=113, @session=1, @year=2013, @vote_number="00291", @vote_date=<Date: 2013-12-20 ((2456647j,0s,0n),+0s,2299161j)>, @issue="PN921", @question="On the Cloture Motion", @vote_result="Agreed to", @vote_count={:yeas=>"59", :nays=>"34"}, @vote_title="Motion to Invoke Cloture on the Nomination of Janet L. Yellen to be Chairman of the Board of Governors of the Federal Reserve System">
+```
 
 ## Authors
 
