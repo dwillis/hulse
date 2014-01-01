@@ -41,6 +41,7 @@ Be aware that in 2012, there were 5 House votes that occurred on Jan. 1, 2013. T
 ## Authors
 
 * [Derek Willis](https://github.com/dwillis)
+* [Eric Mill](https://github.com/konklone)
 
 ## Contributing
 
