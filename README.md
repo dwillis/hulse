@@ -43,7 +43,7 @@ For Senate votes, you can grab a year's SenateVote objects (with a limited set o
 ```ruby
 2.0.0p353 :006 > senate_2013 = SenateVote.summary(2013)
 2.0.0p353 :007 > senate_2013.first
-=> #<Hulse::SenateVote:0x000001017f0d58 @congress=113, @session=1, @year=2013, @vote_number="00291", @vote_date=<Date: 2013-12-20 ((2456647j,0s,0n),+0s,2299161j)>, @issue="PN921", @question="On the Cloture Motion", @vote_result="Agreed to", @vote_count={:yeas=>"59", :nays=>"34"}, @vote_title="Motion to Invoke Cloture on the Nomination of Janet L. Yellen to be Chairman of the Board of Governors of the Federal Reserve System">
+=> <Hulse::SenateVote:0x000001017f0d58 @congress=113, @session=1, @year=2013, @vote_number="00291", @vote_date=<Date: 2013-12-20 ((2456647j,0s,0n),+0s,2299161j)>, @issue="PN921", @question="On the Cloture Motion", @vote_result="Agreed to", @vote_count={:yeas=>"59", :nays=>"34"}, @vote_title="Motion to Invoke Cloture on the Nomination of Janet L. Yellen to be Chairman of the Board of Governors of the Federal Reserve System">
 ```
 
 ## Authors
