@@ -48,6 +48,7 @@ module Hulse
       congress, session = Hulse::Utils.convert_year_to_congress_and_session(year)
       url = "http://www.senate.gov/legislative/LIS/roll_call_lists/vote_menu_#{congress}_#{session}.xml"
       response = HTTParty.get(url)
+      return nil if response.code == 404
       votes = response.parsed_response['vote_summary']['votes']['vote']
       votes.map{|v| self.new(congress: congress, session: session, year: year, vote_number: v['vote_number'], vote_date: Date.strptime(v['vote_date']+"-#{year}", "%d-%b-%Y"), issue: v['issue'], 
         question: v['question'], vote_result: v['result'], vote_count: v['vote_tally'].inject({}){|memo,(k,v)| memo[k.to_sym] = v; memo}, vote_title: v['title'])}
