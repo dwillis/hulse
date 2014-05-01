@@ -1,8 +1,9 @@
+require 'httparty'
+require 'oj'
 require "hulse/version"
 require "hulse/house_vote"
 require "hulse/senate_vote"
-require 'httparty'
-require 'oj'
+require "hulse/record"
 
 module Hulse
   class Utils
@@ -15,7 +16,7 @@ module Hulse
 
     def self.convert_year_to_congress_and_session(year)
       congress = congress_for_year year
-      session = year.odd? ? 1 : 2
+      session = year.to_i.odd? ? 1 : 2
       return [congress, session]
     end
 
