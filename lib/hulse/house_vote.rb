@@ -18,8 +18,10 @@ module Hulse
 
     def self.create_from_vote(response)
       party_totals = []
-      response['vote_metadata']['vote_totals']['totals_by_party'].each do |p|
-        party_totals << p.inject({}){|memo,(k,v)| memo[k.to_sym] = v; memo}
+      if response['vote_metadata']['vote_totals']['totals_by_party']
+        response['vote_metadata']['vote_totals']['totals_by_party'].each do |p|
+          party_totals << p.inject({}){|memo,(k,v)| memo[k.to_sym] = v; memo}
+        end
       end
       members = []
       mappings = {"__content__" => "name"}
@@ -28,6 +30,11 @@ module Hulse
         m['legislator']['bioguide_id'] = m['legislator'].delete('name_id') # prior to 2003, bioguide IDs were not used in the XML
         m['legislator']['vote'] = m['vote']
         members << m['legislator'].inject({}){|memo,(k,v)| memo[k.to_sym] = v; memo}
+      end
+      if response['vote_metadata']['vote_question'] == 'Election of the Speaker'
+        vote_counts = response['vote_metadata']['vote_totals']['totals_by_candidate'].reject{|k,v| k == 'total_stub'}.inject({}){|memo,(k,v)| memo[k['candidate'].to_sym] = k['candidate_total'].to_i; memo}
+      else
+        vote_counts = response['vote_metadata']['vote_totals']['totals_by_vote'].reject{|k,v| k == 'total_stub'}.inject({}){|memo,(k,v)| memo[k.to_sym] = v.to_i; memo}
       end
       self.new(majority: response['vote_metadata']['majority'],
         congress: response['vote_metadata']['congress'].to_i,
@@ -43,7 +50,7 @@ module Hulse
         vote_timestamp: DateTime.parse(response['vote_metadata']['action_date'] + ' ' + response['vote_metadata']['action_time']['time_etz']),
         description: response['vote_metadata']['vote_desc'],
         party_summary: party_totals,
-        vote_count: response['vote_metadata']['vote_totals']['totals_by_vote'].reject{|k,v| k == 'total_stub'}.inject({}){|memo,(k,v)| memo[k.to_sym] = v.to_i; memo},
+        vote_count: vote_counts,
         members: members)
       end
   end

@@ -3,7 +3,6 @@ require 'oj'
 require "hulse/version"
 require "hulse/house_vote"
 require "hulse/senate_vote"
-require "hulse/record"
 
 module Hulse
   class Utils
