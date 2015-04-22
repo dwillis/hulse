@@ -42,7 +42,7 @@ module Hulse
           phone: member['member_info']['phone'],
           last_elected_date: Date.parse(member['member_info']['elected_date']['date']),
           sworn_date: Date.parse(member['member_info']['sworn_date']['date']),
-          committees: member['committee_assignments']['committee']
+          committees: member['committee_assignments']['committee'],
           subcommittees: member['committee_assignments']['subcommittee']
         )
       end
