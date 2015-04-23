@@ -1,48 +1,39 @@
-<!doctype html>
-<html>
+<!DOCTYPE html>
+<html lang="en-us">
   <head>
-    <meta charset="utf-8">
-    <meta http-equiv="X-UA-Compatible" content="chrome=1">
+    <meta charset="UTF-8">
     <title>Hulse by dwillis</title>
-
-    <link rel="stylesheet" href="stylesheets/styles.css">
-    <link rel="stylesheet" href="stylesheets/pygment_trac.css">
-    <script src="javascripts/scale.fix.js"></script>
-    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
-    <!--[if lt IE 9]>
-    <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
-    <![endif]-->
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" type="text/css" href="stylesheets/normalize.css" media="screen">
+    <link href='http://fonts.googleapis.com/css?family=Open+Sans:400,700' rel='stylesheet' type='text/css'>
+    <link rel="stylesheet" type="text/css" href="stylesheets/stylesheet.css" media="screen">
+    <link rel="stylesheet" type="text/css" href="stylesheets/github-light.css" media="screen">
   </head>
   <body>
-    <div class="wrapper">
-      <header>
-        <h1 class="header">Hulse</h1>
-        <p class="header">Ruby wrapper for House and Senate roll call votes</p>
+    <section class="page-header">
+      <h1 class="project-name">Hulse</h1>
+      <h2 class="project-tagline">Ruby wrapper for House and Senate roll call votes</h2>
+      <a href="https://github.com/dwillis/hulse" class="btn">View on GitHub</a>
+      <a href="https://github.com/dwillis/hulse/zipball/master" class="btn">Download .zip</a>
+      <a href="https://github.com/dwillis/hulse/tarball/master" class="btn">Download .tar.gz</a>
+    </section>
 
-        <ul>
-          <li class="download"><a class="buttons" href="https://github.com/dwillis/hulse/zipball/master">Download ZIP</a></li>
-          <li class="download"><a class="buttons" href="https://github.com/dwillis/hulse/tarball/master">Download TAR</a></li>
-          <li><a class="buttons github" href="https://github.com/dwillis/hulse">View On GitHub</a></li>
-        </ul>
+    <section class="main-content">
+      <h1>
+<a id="hulse" class="anchor" href="#hulse" aria-hidden="true"><span class="octicon octicon-link"></span></a>Hulse</h1>
 
-        <p class="header">This project is maintained by <a class="header name" href="https://github.com/dwillis">dwillis</a></p>
+<p>Hulse is a Ruby gem for accessing House and Senate roll call votes from the official sources on <a href="http://clerk.house.gov/evs/2013/index.asp">house.gov</a> and <a href="http://www.senate.gov/pagelayout/legislative/a_three_sections_with_teasers/votes.htm">senate.gov</a>. It works using Ruby 1.9.3 and 2.x.</p>
 
+<p>Hulse has two vote classes, <code>HouseVote</code> and <code>SenateVote</code>, which create Ruby objects using the XML attributes available from roll call vote data (voice votes are not covered by Hulse or available as data from official sources). Hulse makes a few changes, renaming some attributes for clarity and consistency, and collapsing each House vote's date and time into a single datetime attribute. Otherwise it does not alter the original data.</p>
 
-      </header>
-      <section>
-        <h1>
-<a name="hulse" class="anchor" href="#hulse"><span class="octicon octicon-link"></span></a>Hulse</h1>
+<p><code>HouseVote</code> and <code>SenateVote</code> have different attributes due to parliamentary conventions and the presence or absence of data in one chamber or the other. Senators are uniquely identified by a <code>lis_member_id</code>; House members are uniquely identified by a <code>bioguide_id</code> beginning in 2003. Prior to 2003, there is no unique ID for House members, but using a combination of name, state and political party one can be manufactured. House member attributes also include an <code>unaccented_name</code> and a <code>name</code> attribute that may contain accent characters.</p>
 
-<p>Hulse is a Ruby gem for accessing House and Senate roll call votes from the official sources on <a href="http://clerk.house.gov/evs/2013/index.asp">house.gov</a> and <a href="http://www.senate.gov/pagelayout/legislative/a_three_sections_with_teasers/votes.htm">senate.gov</a>. It works using Ruby 1.9.3 and 2.0.0.</p>
-
-<p>Hulse has two classes, <code>HouseVote</code> and <code>SenateVote</code>, which create Ruby objects using the XML attributes available from roll call vote data (voice votes are not covered by Hulse or available as data from official sources). Hulse makes a few changes, renaming some attributes for clarity and consistency, and collapsing each House vote's date and time into a single datetime attribute. Otherwise it does not alter the original data.</p>
-
-<p><code>HouseVote</code> and <code>SenateVote</code> have different attributes due to parliamentary conventions and the presence or absence of data in one chamber or the other. Senators are uniquely identified by a <code>lis_member_id</code>; House members are uniquely identified by a <code>bioguide_id</code> beginning in 2003. Prior to 2003, there is no unique ID for House members, but using a combination of name, state and political party one can be manfactured. House member attributes also include an <code>unaccented_name</code> and an <code>name</code> attribute that may contain accent characters.</p>
+<p>Hulse also has two member classes, <code>HouseMember</code> and <code>SenateMember</code>, which create Ruby objects using the XML made available by the Clerk of the House and the Secretary of the Senate. House members have some basic information, including the unique <code>bioguide_id</code>, along with office details and committee and subcommittee assignment data. For vacant seats, information on the seat's previous occupant is available. Senate members have less information, but their data includes the Senate class and the URLs of their websites and email forms.</p>
 
 <p>Hulse is named for <a href="https://www.nytimes.com/learning/students/ask_reporters/Carl_Hulse.html">Carl Hulse</a>, a longtime congressional correspondent for The New York Times.</p>
 
 <h2>
-<a name="installation" class="anchor" href="#installation"><span class="octicon octicon-link"></span></a>Installation</h2>
+<a id="installation" class="anchor" href="#installation" aria-hidden="true"><span class="octicon octicon-link"></span></a>Installation</h2>
 
 <p>Add this line to your application's Gemfile:</p>
 
@@ -60,36 +51,43 @@
 </code></pre>
 
 <h2>
-<a name="usage" class="anchor" href="#usage"><span class="octicon octicon-link"></span></a>Usage</h2>
+<a id="usage" class="anchor" href="#usage" aria-hidden="true"><span class="octicon octicon-link"></span></a>Usage</h2>
 
 <p>For both House and Senate votes, pass the year and roll call number into the <code>find</code> class method:</p>
 
-<div class="highlight highlight-ruby"><pre><span class="mi">2</span><span class="o">.</span><span class="mi">0</span><span class="o">.</span><span class="mi">0</span><span class="n">p353</span> <span class="p">:</span><span class="mo">001</span> <span class="o">&gt;</span> <span class="nb">require</span> <span class="s1">'hulse'</span>
-<span class="mi">2</span><span class="o">.</span><span class="mi">0</span><span class="o">.</span><span class="mi">0</span><span class="n">p353</span> <span class="p">:</span><span class="mo">002</span> <span class="o">&gt;</span> <span class="kp">include</span> <span class="no">Hulse</span>
-<span class="mi">2</span><span class="o">.</span><span class="mi">0</span><span class="o">.</span><span class="mi">0</span><span class="n">p353</span> <span class="p">:</span><span class="mo">003</span> <span class="o">&gt;</span> <span class="n">hv</span> <span class="o">=</span> <span class="no">HouseVote</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="mi">2013</span><span class="p">,</span> <span class="mi">628</span><span class="p">)</span>
-<span class="mi">2</span><span class="o">.</span><span class="mi">0</span><span class="o">.</span><span class="mi">0</span><span class="n">p353</span> <span class="p">:</span><span class="mo">004</span> <span class="o">&gt;</span> <span class="n">hv</span><span class="o">.</span><span class="n">question</span>
- <span class="o">=&gt;</span> <span class="s2">"On Agreeing to the Amendment"</span>
-<span class="mi">2</span><span class="o">.</span><span class="mi">0</span><span class="o">.</span><span class="mi">0</span><span class="n">p353</span> <span class="p">:</span><span class="mo">005</span> <span class="o">&gt;</span> <span class="n">hv</span><span class="o">.</span><span class="n">vote_count</span>
-  <span class="o">=&gt;</span> <span class="p">{</span><span class="ss">:yea_total</span><span class="o">=&gt;</span><span class="mi">157</span><span class="p">,</span> <span class="ss">:nay_total</span><span class="o">=&gt;</span><span class="mi">258</span><span class="p">,</span> <span class="ss">:present_total</span><span class="o">=&gt;</span><span class="mi">0</span><span class="p">,</span> <span class="ss">:not_voting_total</span><span class="o">=&gt;</span><span class="mi">16</span><span class="p">}</span>
-</pre></div>
+<div class="highlight highlight-ruby"><pre><span class="pl-c1">2.0</span>.0p353 :<span class="pl-c1">001</span> <span class="pl-k">&gt;</span> <span class="pl-k">require</span> <span class="pl-s"><span class="pl-pds">'</span>hulse<span class="pl-pds">'</span></span>
+<span class="pl-c1">2.0</span>.0p353 :<span class="pl-c1">002</span> <span class="pl-k">&gt;</span> <span class="pl-k">include</span> <span class="pl-c1">Hulse</span>
+<span class="pl-c1">2.0</span>.0p353 :<span class="pl-c1">003</span> <span class="pl-k">&gt;</span> hv <span class="pl-k">=</span> <span class="pl-c1">HouseVote</span>.find(<span class="pl-c1">2013</span>, <span class="pl-c1">628</span>)
+<span class="pl-c1">2.0</span>.0p353 :<span class="pl-c1">004</span> <span class="pl-k">&gt;</span> hv.question
+ =&gt; <span class="pl-s"><span class="pl-pds">"</span>On Agreeing to the Amendment<span class="pl-pds">"</span></span>
+<span class="pl-c1">2.0</span>.0p353 :<span class="pl-c1">005</span> <span class="pl-k">&gt;</span> hv.vote_count
+  =&gt; {<span class="pl-c1">:yea_total</span>=&gt;<span class="pl-c1">157</span>, <span class="pl-c1">:nay_total</span>=&gt;<span class="pl-c1">258</span>, <span class="pl-c1">:present_total</span>=&gt;<span class="pl-c1">0</span>, <span class="pl-c1">:not_voting_total</span>=&gt;<span class="pl-c1">16</span>}</pre></div>
 
 <p>Be aware that in 2012, there were 5 House votes that occurred on Jan. 1, 2013. These are considered "2012" votes by <a href="http://clerk.house.gov/evs/2012/index.asp">the Clerk of the House</a>, so use 2012 as the year for these.</p>
 
 <p>For Senate votes, you can grab a year's SenateVote objects (with a limited set of attributes) by using the <code>summary</code> method:</p>
 
-<div class="highlight highlight-ruby"><pre><span class="mi">2</span><span class="o">.</span><span class="mi">0</span><span class="o">.</span><span class="mi">0</span><span class="n">p353</span> <span class="p">:</span><span class="mo">006</span> <span class="o">&gt;</span> <span class="n">senate_2013</span> <span class="o">=</span> <span class="no">SenateVote</span><span class="o">.</span><span class="n">summary</span><span class="p">(</span><span class="mi">2013</span><span class="p">)</span>
-<span class="mi">2</span><span class="o">.</span><span class="mi">0</span><span class="o">.</span><span class="mi">0</span><span class="n">p353</span> <span class="p">:</span><span class="mo">007</span> <span class="o">&gt;</span> <span class="n">senate_2013</span><span class="o">.</span><span class="n">first</span>
-<span class="o">=&gt;</span> <span class="o">&lt;</span><span class="no">Hulse</span><span class="o">::</span><span class="ss">SenateVote</span><span class="p">:</span><span class="mh">0x000001017f0d58</span> <span class="vi">@congress</span><span class="o">=</span><span class="mi">113</span><span class="p">,</span> <span class="vi">@session</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="vi">@year</span><span class="o">=</span><span class="mi">2013</span><span class="p">,</span> <span class="vi">@vote_number</span><span class="o">=</span><span class="s2">"00291"</span><span class="p">,</span> <span class="vi">@vote_date</span><span class="o">=&lt;</span><span class="ss">Date</span><span class="p">:</span> <span class="mi">2013</span><span class="o">-</span><span class="mi">12</span><span class="o">-</span><span class="mi">20</span> <span class="p">((</span><span class="mi">2456647</span><span class="n">j</span><span class="p">,</span><span class="mi">0</span><span class="n">s</span><span class="p">,</span><span class="mi">0</span><span class="n">n</span><span class="p">),</span><span class="o">+</span><span class="mi">0</span><span class="n">s</span><span class="p">,</span><span class="mi">2299161</span><span class="n">j</span><span class="p">)</span><span class="o">&gt;</span><span class="p">,</span> <span class="vi">@issue</span><span class="o">=</span><span class="s2">"PN921"</span><span class="p">,</span> <span class="vi">@question</span><span class="o">=</span><span class="s2">"On the Cloture Motion"</span><span class="p">,</span> <span class="vi">@vote_result</span><span class="o">=</span><span class="s2">"Agreed to"</span><span class="p">,</span> <span class="vi">@vote_count</span><span class="o">=</span><span class="p">{</span><span class="ss">:yeas</span><span class="o">=&gt;</span><span class="s2">"59"</span><span class="p">,</span> <span class="ss">:nays</span><span class="o">=&gt;</span><span class="s2">"34"</span><span class="p">},</span> <span class="vi">@vote_title</span><span class="o">=</span><span class="s2">"Motion to Invoke Cloture on the Nomination of Janet L. Yellen to be Chairman of the Board of Governors of the Federal Reserve System"</span><span class="o">&gt;</span>
-</pre></div>
+<div class="highlight highlight-ruby"><pre><span class="pl-c1">2.0</span>.0p353 :<span class="pl-c1">006</span> <span class="pl-k">&gt;</span> senate_2013 <span class="pl-k">=</span> <span class="pl-c1">SenateVote</span>.summary(<span class="pl-c1">2013</span>)
+<span class="pl-c1">2.0</span>.0p353 :<span class="pl-c1">007</span> <span class="pl-k">&gt;</span> senate_2013.first
+=&gt; <span class="pl-k">&lt;</span><span class="pl-c1">Hulse</span>::<span class="pl-c1">SenateVote:</span>0x000001017f0d58 <span class="pl-smi">@congress</span><span class="pl-k">=</span><span class="pl-c1">113</span>, <span class="pl-smi">@session</span><span class="pl-k">=</span><span class="pl-c1">1</span>, <span class="pl-smi">@year</span><span class="pl-k">=</span><span class="pl-c1">2013</span>, <span class="pl-smi">@vote_number</span><span class="pl-k">=</span><span class="pl-s"><span class="pl-pds">"</span>00291<span class="pl-pds">"</span></span>, <span class="pl-smi">@vote_date</span><span class="pl-k">=</span><span class="pl-k">&lt;</span><span class="pl-c1">Date:</span> <span class="pl-c1">2013</span><span class="pl-k">-</span><span class="pl-c1">12</span><span class="pl-k">-</span><span class="pl-c1">20</span> ((2456647j,0s,0n),<span class="pl-k">+</span>0s,2299161j)<span class="pl-k">&gt;</span>, <span class="pl-smi">@issue</span><span class="pl-k">=</span><span class="pl-s"><span class="pl-pds">"</span>PN921<span class="pl-pds">"</span></span>, <span class="pl-smi">@question</span><span class="pl-k">=</span><span class="pl-s"><span class="pl-pds">"</span>On the Cloture Motion<span class="pl-pds">"</span></span>, <span class="pl-smi">@vote_result</span><span class="pl-k">=</span><span class="pl-s"><span class="pl-pds">"</span>Agreed to<span class="pl-pds">"</span></span>, <span class="pl-smi">@vote_count</span><span class="pl-k">=</span>{<span class="pl-c1">:yeas</span>=&gt;<span class="pl-s"><span class="pl-pds">"</span>59<span class="pl-pds">"</span></span>, <span class="pl-c1">:nays</span>=&gt;<span class="pl-s"><span class="pl-pds">"</span>34<span class="pl-pds">"</span></span>}, <span class="pl-smi">@vote_title</span><span class="pl-k">=</span><span class="pl-s"><span class="pl-pds">"</span>Motion to Invoke Cloture on the Nomination of Janet L. Yellen to be Chairman of the Board of Governors of the Federal Reserve System<span class="pl-pds">"</span></span><span class="pl-k">&gt;</span></pre></div>
+
+<p>House and Senate members have a <code>current</code> class method that retrieves the latest XML data from the House and Senate websites and creates Ruby objects. The House file has more data, including vacancies, than the Senate file does.</p>
+
+<div class="highlight highlight-ruby"><pre>irb(main):<span class="pl-c1">003</span><span class="pl-c1">:&gt;</span> <span class="pl-k">require</span> <span class="pl-s"><span class="pl-pds">'</span>hulse<span class="pl-pds">'</span></span>
+irb(main):<span class="pl-c1">003</span>:<span class="pl-c1">0</span><span class="pl-k">&gt;</span> members <span class="pl-k">=</span> <span class="pl-c1">Hulse</span>::<span class="pl-c1">HouseMember</span>.current
+irb(main):<span class="pl-c1">004</span>:<span class="pl-c1">0</span><span class="pl-k">&gt;</span> members.first
+=&gt; &lt;Hulse::HouseMember:0x007fc6cb37f020 @bioguide_id="Y000033", @sort_name="YOUNG,DON", @last_name="Young", @first_name="Don", @middle_name=nil, @suffix=nil, @courtesy="Mr.", @official_name="Don Young", @formal_name="Mr. Young of Alaska", @party="R", @caucus_party="R", @state_postal="AK", @state_name="Alaska", @district="At Large", @district_code="AK00", @hometown="Fort Yukon", @office_building="RHOB", @office_room="2314", @office_zip="20515-0200", @phone="(202) 225-5765", @last_elected_date=#&lt;Date: 2014-11-04 ((2456966j,0s,0n),+0s,2299161j)&gt;, @sworn_date=#&lt;Date: 2015-01-12 ((2457035j,0s,0n),+0s,2299161j)&gt;, @committees=[{"comcode"=&gt;"II00", "rank"=&gt;"2"}, {"comcode"=&gt;"PW00", "rank"=&gt;"2"}], @subcommittees=[{"subcomcode"=&gt;"II10", "rank"=&gt;"2"}, {"subcomcode"=&gt;"II13", "rank"=&gt;"2"}, {"subcomcode"=&gt;"II24", "rank"=&gt;"1", "leadership"=&gt;"Chairman"}, {"subcomcode"=&gt;"PW05", "rank"=&gt;"2"}, {"subcomcode"=&gt;"PW07", "rank"=&gt;"2"}, {"subcomcode"=&gt;"PW12", "rank"=&gt;"2"}], @is_vacant=false, @footnote=nil, @predecessor=nil, @vacancy_date=nil&gt;</pre></div>
 
 <h2>
-<a name="authors" class="anchor" href="#authors"><span class="octicon octicon-link"></span></a>Authors</h2>
+<a id="authors" class="anchor" href="#authors" aria-hidden="true"><span class="octicon octicon-link"></span></a>Authors</h2>
 
 <ul>
 <li><a href="https://github.com/dwillis">Derek Willis</a></li>
 <li><a href="https://github.com/konklone">Eric Mill</a></li>
-</ul><h2>
-<a name="contributing" class="anchor" href="#contributing"><span class="octicon octicon-link"></span></a>Contributing</h2>
+</ul>
+
+<h2>
+<a id="contributing" class="anchor" href="#contributing" aria-hidden="true"><span class="octicon octicon-link"></span></a>Contributing</h2>
 
 <ol>
 <li>Fork it ( <a href="http://github.com/dwillis/hulse/fork">http://github.com/dwillis/hulse/fork</a> )</li>
@@ -98,12 +96,16 @@
 <li>Push to the branch (<code>git push origin my-new-feature</code>)</li>
 <li>Create new Pull Request</li>
 </ol>
-      </section>
-      <footer>
-        <p><small>Hosted on <a href="http://pages.github.com">GitHub Pages</a> using the Dinky theme</small></p>
+
+      <footer class="site-footer">
+        <span class="site-footer-owner"><a href="https://github.com/dwillis/hulse">Hulse</a> is maintained by <a href="https://github.com/dwillis">dwillis</a>.</span>
+
+        <span class="site-footer-credits">This page was generated by <a href="https://pages.github.com">GitHub Pages</a> using the <a href="https://github.com/jasonlong/cayman-theme">Cayman theme</a> by <a href="https://twitter.com/jasonlong">Jason Long</a>.</span>
       </footer>
-    </div>
-    <!--[if !IE]><script>fixScale(document);</script><![endif]-->
-		
+
+    </section>
+
+  
   </body>
 </html>
+
