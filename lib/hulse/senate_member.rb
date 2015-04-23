@@ -1,10 +1,8 @@
 module Hulse
   class SenateMember
 
-    attr_reader :bioguide_id, :sort_name, :last_name, :first_name, :middle_name, :suffix, :courtesy, :official_name,
-    :formal_name, :party, :caucus_party, :state_postal, :state_name, :district_code, :hometown, :office_building,
-    :office_room, :office_zip, :phone, :last_elected_date, :sworn_date, :committees, :subcommittees, :is_vacant,
-    :footnote, :predecessor, :vacancy_date
+    attr_reader :bioguide_id, :last_name, :first_name, :title, :senate_class, :address, :email, :website,
+    :party, :state_postal
 
     def initialize(params={})
       params.each_pair do |k,v|
@@ -12,7 +10,7 @@ module Hulse
       end
     end
 
-    def self.list
+    def self.current
       url = "http://www.senate.gov/general/contact_information/senators_cfm.xml"
       response = HTTParty.get(url)
       self.create_from_xml(response)
@@ -28,7 +26,7 @@ module Hulse
           first_name: member['first_name'],
           party: member['party'],
           state_postal: member['state'],
-          class: member['class'],
+          senate_class: member['class'],
           address: member['address'],
           phone: member['phone'],
           email: member['email'],

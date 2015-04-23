@@ -12,7 +12,7 @@ module Hulse
       end
     end
 
-    def self.clerk_list
+    def self.current
       url = "http://clerk.house.gov/xml/lists/MemberData.xml"
       response = HTTParty.get(url)
       self.create_from_xml(response)
