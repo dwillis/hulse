@@ -6,7 +6,7 @@ Hulse has two vote classes, `HouseVote` and `SenateVote`, which create Ruby obje
 
 `HouseVote` and `SenateVote` have different attributes due to parliamentary conventions and the presence or absence of data in one chamber or the other. Senators are uniquely identified by a `lis_member_id`; House members are uniquely identified by a `bioguide_id` beginning in 2003. Prior to 2003, there is no unique ID for House members, but using a combination of name, state and political party one can be manufactured. House member attributes also include an `unaccented_name` and a `name` attribute that may contain accent characters.
 
-Hulse also has two member classes, `HouseMember` and `SenateMember`, which create Ruby objects using the XML made available by the Clerk of the House and the Secretary of the Senate. House members have some basic information, including the unique `bioguide_id`, along with office details and committee and subcommittee assignment data. For vacant seats, information on the seat's previous occupant is available.
+Hulse also has two member classes, `HouseMember` and `SenateMember`, which create Ruby objects using the XML made available by the Clerk of the House and the Secretary of the Senate. House members have some basic information, including the unique `bioguide_id`, along with office details and committee and subcommittee assignment data. For vacant seats, information on the seat's previous occupant is available. Senate members have less information, but their data includes the Senate class and the URLs of their websites and email forms.
 
 Hulse is named for [Carl Hulse](https://www.nytimes.com/learning/students/ask_reporters/Carl_Hulse.html), a longtime congressional correspondent for The New York Times.
 
