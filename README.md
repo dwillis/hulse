@@ -1,6 +1,8 @@
 # Hulse
 
-Hulse is a Ruby gem for accessing House and Senate roll call votes from the official sources on [house.gov](http://clerk.house.gov/evs/2013/index.asp) and [senate.gov](http://www.senate.gov/pagelayout/legislative/a_three_sections_with_teasers/votes.htm). It works using Ruby 1.9.3 and 2.0.0.
+Hulse is a Ruby gem for accessing raw data and information published by and about the U.S. Congress. It works using Ruby 1.9.3, 2.0 and 2.1. It is not a wrapper for existing non-governmental APIs of congressional information. Instead, it loads, parses and scrapes official sources.
+
+Hulse can be used to get House and Senate roll call votes from the official sources on [house.gov](http://clerk.house.gov/evs/2013/index.asp) and [senate.gov](http://www.senate.gov/pagelayout/legislative/a_three_sections_with_teasers/votes.htm).
 
 Hulse has two classes, `HouseVote` and `SenateVote`, which create Ruby objects using the XML attributes available from roll call vote data (voice votes are not covered by Hulse or available as data from official sources). Hulse makes a few changes, renaming some attributes for clarity and consistency, and collapsing each House vote's date and time into a single datetime attribute. Otherwise it does not alter the original data.
 
@@ -45,6 +47,10 @@ For Senate votes, you can grab a year's SenateVote objects (with a limited set o
 2.0.0p353 :007 > senate_2013.first
 => <Hulse::SenateVote:0x000001017f0d58 @congress=113, @session=1, @year=2013, @vote_number="00291", @vote_date=<Date: 2013-12-20 ((2456647j,0s,0n),+0s,2299161j)>, @issue="PN921", @question="On the Cloture Motion", @vote_result="Agreed to", @vote_count={:yeas=>"59", :nays=>"34"}, @vote_title="Motion to Invoke Cloture on the Nomination of Janet L. Yellen to be Chairman of the Board of Governors of the Federal Reserve System">
 ```
+
+## Tests
+
+Hulse uses `MiniTest` for development. To run the tests, do `rake test`.
 
 ## Authors
 
