@@ -8,8 +8,8 @@ Gem::Specification.new do |spec|
   spec.version       = Hulse::VERSION
   spec.authors       = ["Derek Willis"]
   spec.email         = ["dwillis@gmail.com"]
-  spec.summary       = %q{Hulse is a Ruby gem for accessing House and Senate roll call votes from the official sources on house.gov and senate.gov}
-  spec.description   = %q{Turns House and Senate votes into Ruby objects for your legislative pleasure.}
+  spec.summary       = %q{Hulse is a Ruby gem for accessing House and Senate roll call votes and member data from the official sources on house.gov and senate.gov}
+  spec.description   = %q{Turns House and Senate votes and members into Ruby objects for your legislative pleasure.}
   spec.homepage      = ""
   spec.license       = "MIT"
 
@@ -23,4 +23,5 @@ Gem::Specification.new do |spec|
   spec.add_development_dependency "minitest"
   spec.add_dependency "httparty"
   spec.add_dependency "oj"
+  spec.add_dependency "american_date"
 end
