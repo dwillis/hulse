@@ -3,6 +3,7 @@ require 'oj'
 require "hulse/version"
 require "hulse/house_vote"
 require "hulse/house_member"
+require "hulse/house_floor"
 require "hulse/senate_vote"
 require "hulse/senate_member"
 
