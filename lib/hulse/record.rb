@@ -1,6 +1,18 @@
 module Hulse
   class Record
 
+    attr_reader :date, :section, :topics, :html
+
+    def initialize(params={})
+      params.each_pair do |k,v|
+        instance_variable_set("@#{k}", v)
+      end
+    end
+
+    def to_s
+      section
+    end
+
     def self.base_url(date=nil)
       if date
         year, month, day = date.year, date.month, date.day
@@ -8,50 +20,85 @@ module Hulse
         date = Date.today-1
         year, month, day = date.year, date.month, date.day
       end
-      "http://beta.congress.gov/congressional-record/#{year}/#{month}/#{day}/"
+      "https://www.congress.gov/congressional-record/#{year}/#{month}/#{day}/"
+    end
+
+    def self.daily_digest(date=nil)
+      doc = HTTParty.get(base_url(date)+'daily-digest')
+      html = Nokogiri::HTML(doc.parsed_response)
+      (html/:pre).text
     end
 
     def self.senate(date=nil)
-      begin
-        doc = Nokogiri::HTML(open(base_url(date)+'senate-section'))
-      rescue
-        return nil
-      end
+      doc = HTTParty.get(base_url(date)+'senate-section')
+      create_from_html(Nokogiri::HTML(doc.parsed_response), date, 'senate')
     end
 
-
-    def self.senate_topics(html)
-      links = (html/:td).map{|d| d.children[1]}.compact
+    def self.house(date=nil)
+      doc = HTTParty.get(base_url(date)+'house-section')
+      create_from_html(Nokogiri::HTML(doc.parsed_response), date, 'house')
     end
 
-    def self.senate_explanations(html)
-      links = (html/:td).map{|d| d.children[1]}.compact
-      vote_explanations = links.select{|l| l.text.include?("VOTE EXPLANATION")}
-      VoteExplanation.create(vote_explanations)
+    def self.extension_of_remarks(date=nil)
+      doc = HTTParty.get(base_url(date)+'extensions-of-remarks-section')
+      create_from_html(Nokogiri::HTML(doc.parsed_response), date, 'extension')
     end
 
-    def self.house(base_url)
-      ['house-section', 'extensions-of-remarks-section'].each do |section|
-        begin
-          doc = Nokogiri::HTML(open(base_url+section))
-        rescue
-          next
-        end
-        links = (doc/:td).map{|d| d.children[1]}.compact
-        personal_explanations = links.select{|l| l.text.include?("PERSONAL EXPLANATION")}
-        links.select{|l| l.text.include?("COMMITTEE ELECTION")}.map{|l| Audit.create(:datatype_id => Datatype::DAILY_DIGEST_PARSER, :success => true, :description => "Found committee elections on #{date.to_s}", :url => l['href'])} unless links.select{|l| l.text.include?("COMMITTEE ELECTION")}.empty?
-        links.select{|l| l.text.include?("DESIGNATING THE CHAIRMAN")}.map{|l| Audit.create(:datatype_id => Datatype::DAILY_DIGEST_PARSER, :success => true, :description => "Found committee chairman designations on #{date.to_s}", :url => l['href'])} unless links.select{|l| l.text.include?("DESIGNATING THE CHAIRMAN")}.empty?
-        links.select{|l| l.text.include?("DESIGNATING THE RANKING")}.map{|l| Audit.create(:datatype_id => Datatype::DAILY_DIGEST_PARSER, :success => true, :description => "Found committee ranking member designations on #{date.to_s}", :url => l['href'])} unless links.select{|l| l.text.include?("DESIGNATING THE RANKING")}.empty?
-        links.select{|l| l.text == "LEAVE OF ABSENCE"}.map{|l| Audit.create(:datatype_id => Datatype::DAILY_DIGEST_PARSER, :success => true, :description => "Found leave of absence on #{date.to_s}", :url => l['href'])} unless links.select{|l| l.text == "LEAVE OF ABSENCE"}.empty?
-        links.select{|l| l.text.include?("COMMITTEE LEAVE OF ABSENCE")}.map{|l| Audit.create(:datatype_id => Datatype::DAILY_DIGEST_PARSER, :success => true, :description => "Found committee leave of absence on #{date.to_s}", :url => l['href'])} unless links.select{|l| l.text.include?("COMMITTEE LEAVE OF ABSENCE")}.empty?
-        links.select{|l| l.text.include?("COMMITTEE RESIGNATION")}.map{|l| Audit.create(:datatype_id => Datatype::DAILY_DIGEST_PARSER, :success => true, :description => "Found committee resignation on #{date.to_s}", :url => l['href'])} unless links.select{|l| l.text.include?("COMMITTEE RESIGNATION")}.empty?
-        unless personal_explanations.empty?
-          personal_explanations.map{|p| PersonalExplanation.find_or_create_by_date_and_url(:date => date, :url => p['href'], :congress_id => congress)}
-          Audit.create(:datatype_id => Datatype::PERSONAL_EXPLANATIONS, :success => true, :description => "Found House personal explanations made on #{date.to_s}")
-        end
-      end
+    def self.create_from_html(html, date, section)
+      section_topics = topics(html)
+      self.new(date: date,
+        section: section,
+        topics: section_topics,
+        html: html
+      )
     end
 
+    def self.topics(html)
+      (html/:td).map{|d| d.children[1]}.compact.map{|l| {url: l['href'], title: l.text.strip}}
+    end
 
+    def has_senate_explanations?
+      topics.select{|l| l[:title].include?("VOTE EXPLANATION")}.empty? ? false : true
+    end
+
+    def senate_explanations
+      topics.select{|l| l[:title].include?("VOTE EXPLANATION")}
+    end
+
+    def has_personal_explanations?
+      topics.select{|l| l[:title].include?("PERSONAL EXPLANATION")}.empty? ? false : true
+    end
+
+    def personal_explanations
+      topics.select{|l| l[:title].include?("PERSONAL EXPLANATION")}
+    end
+
+    def has_committee_elections?
+      topics.select{|l| l[:title].include?("COMMITTEE ELECTION")}.empty? ? false : true
+    end
+
+    def committee_elections
+      topics.select{|l| l[:title].include?("COMMITTEE ELECTION")}
+    end
+
+    def has_committee_resignations?
+      topics.select{|l| l[:title].include?("COMMITTEE RESIGNATION")}.empty? ? false : true
+    end
+
+    def chairman_designations
+      topics.select{|l| l[:title].include?("DESIGNATING THE CHAIRMAN")}
+    end
+
+    def ranking_designations
+      topics.select{|l| l[:title].include?("DESIGNATING THE RANKING")}
+    end
+
+    def leaves_of_absence
+      topics.select{|l| l[:title].include?("LEAVE OF ABSENCE")}
+    end
+
+    def committee_leaves_of_absence
+      topics.select{|l| l[:title].include?("COMMITTEE LEAVE OF ABSENCE")}
+    end
   end
 end
