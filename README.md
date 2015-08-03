@@ -1,7 +1,6 @@
 # Hulse
 
-<<<<<<< HEAD
-Hulse is a Ruby gem for accessing raw data and information published by and about the U.S. Congress. It works using Ruby 1.9.3, 2.0 and 2.1. It is not a wrapper for existing non-governmental APIs of congressional information. Instead, it loads, parses and scrapes official sources.
+Hulse is a Ruby gem for accessing raw data and information published by and about the U.S. Congress. It works using Ruby 1.9.3, 2.0, 2.1 and 2.2. It is not a wrapper for existing non-governmental APIs of congressional information. Instead, it loads, parses and scrapes official sources.
 
 Hulse can be used to get House and Senate roll call votes from the official sources on [house.gov](http://clerk.house.gov/evs/2013/index.asp) and [senate.gov](http://www.senate.gov/pagelayout/legislative/a_three_sections_with_teasers/votes.htm).
 
@@ -10,6 +9,8 @@ Hulse has two vote classes, `HouseVote` and `SenateVote`, which create Ruby obje
 `HouseVote` and `SenateVote` have different attributes due to parliamentary conventions and the presence or absence of data in one chamber or the other. Senators are uniquely identified by a `lis_member_id`; House members are uniquely identified by a `bioguide_id` beginning in 2003. Prior to 2003, there is no unique ID for House members, but using a combination of name, state and political party one can be manufactured. House member attributes also include an `unaccented_name` and a `name` attribute that may contain accent characters.
 
 Hulse also has two member classes, `HouseMember` and `SenateMember`, which create Ruby objects using the XML made available by the Clerk of the House and the Secretary of the Senate. House members have some basic information, including the unique `bioguide_id`, along with office details and committee and subcommittee assignment data. For vacant seats, information on the seat's previous occupant is available. Senate members have less information, but their data includes the Senate class and the URLs of their websites and email forms.
+
+Hulse has two other classes, `HouseFloor` and `Record`. The former provides a wrapper to [XML data on floor activity](http://clerk.house.gov/floorsummary/floor.aspx?day=20150729) published by the Clerk of the House, including timestamps and descriptions. The `Record` class provides a basic wrapper to the [Congressional Record](https://www.congress.gov/congressional-record), the daily listing of activities by the House and Senate, as well as some methods for accessing specific portions of it, particularly the titles and permalinks of articles.
 
 Hulse is named for [Carl Hulse](https://www.nytimes.com/learning/students/ask_reporters/Carl_Hulse.html), a longtime congressional correspondent for The New York Times.
 
