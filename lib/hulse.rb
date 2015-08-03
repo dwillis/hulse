@@ -1,6 +1,8 @@
 require 'httparty'
 require 'oj'
+require 'nokogiri'
 require "hulse/version"
+require "hulse/record"
 require "hulse/house_vote"
 require "hulse/house_member"
 require "hulse/house_floor"
