@@ -22,6 +22,7 @@ Gem::Specification.new do |spec|
   spec.add_development_dependency "rake"
   spec.add_development_dependency "minitest"
   spec.add_dependency "httparty"
+  spec.add_dependency "nokogiri"
   spec.add_dependency "oj"
   spec.add_dependency "american_date"
 end
