@@ -25,11 +25,13 @@ module Hulse
       end
       members = []
       mappings = {"__content__" => "name"}
-      response['vote_data']['recorded_vote'].each do |m|
-        m['legislator']['name'] = m['legislator'].delete('__content__')
-        m['legislator']['bioguide_id'] = m['legislator'].delete('name_id') # prior to 2003, bioguide IDs were not used in the XML
-        m['legislator']['vote'] = m['vote']
-        members << m['legislator'].inject({}){|memo,(k,v)| memo[k.to_sym] = v; memo}
+      if response['vote_data']
+        response['vote_data']['recorded_vote'].each do |m|
+          m['legislator']['name'] = m['legislator'].delete('__content__')
+          m['legislator']['bioguide_id'] = m['legislator'].delete('name_id') # prior to 2003, bioguide IDs were not used in the XML
+          m['legislator']['vote'] = m['vote']
+          members << m['legislator'].inject({}){|memo,(k,v)| memo[k.to_sym] = v; memo}
+        end
       end
       if response['vote_metadata']['vote_question'] == 'Election of the Speaker'
         vote_counts = response['vote_metadata']['vote_totals']['totals_by_candidate'].reject{|k,v| k == 'total_stub'}.inject({}){|memo,(k,v)| memo[k['candidate'].to_sym] = k['candidate_total'].to_i; memo}
@@ -47,7 +49,7 @@ module Hulse
         amendment_author: response['vote_metadata']['amendment_author'],
         vote_type: response['vote_metadata']['vote_type'],
         vote_result: response['vote_metadata']['vote_result'],
-        vote_timestamp: DateTime.parse(response['vote_metadata']['action_date'] + ' ' + response['vote_metadata']['action_time']['time_etz']),
+        vote_timestamp: begin DateTime.parse(response['vote_metadata']['action_date'] + ' ' + response['vote_metadata']['action_time']['time_etz']) rescue nil end,
         description: response['vote_metadata']['vote_desc'],
         party_summary: party_totals,
         vote_count: vote_counts,
