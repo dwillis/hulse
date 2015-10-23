@@ -10,7 +10,7 @@ Hulse has two vote classes, `HouseVote` and `SenateVote`, which create Ruby obje
 
 Hulse also has two member classes, `HouseMember` and `SenateMember`, which create Ruby objects using the XML made available by the Clerk of the House and the Secretary of the Senate. House members have some basic information, including the unique `bioguide_id`, along with office details and committee and subcommittee assignment data. For vacant seats, information on the seat's previous occupant is available. Senate members have less information, but their data includes the Senate class and the URLs of their websites and email forms.
 
-Hulse has two other classes, `HouseFloor` and `Record`. The former provides a wrapper to [XML data on floor activity](http://clerk.house.gov/floorsummary/floor.aspx?day=20150729) published by the Clerk of the House, including timestamps and descriptions. The `Record` class provides a basic wrapper to the [Congressional Record](https://www.congress.gov/congressional-record), the daily listing of activities by the House and Senate, as well as some methods for accessing specific portions of it, particularly the titles and permalinks of articles.
+Hulse has three other classes, `HouseFloor`, `Record` and `Communication.` The first provides a wrapper to [XML data on floor activity](http://clerk.house.gov/floorsummary/floor.aspx?day=20150729) published by the Clerk of the House, including timestamps and descriptions. The `Record` class provides a basic wrapper to the [Congressional Record](https://www.congress.gov/congressional-record), the daily listing of activities by the House and Senate, as well as some methods for accessing specific portions of it, particularly the titles and permalinks of articles. The `Communication` class provides a wrapper to [presidential and executive branch communications sent to the Senate](https://www.congress.gov/communications).
 
 Lastly, if you ever need to convert a year to its corresponding congress and session numbers, Hulse has a utility method for doing so.
 
@@ -64,7 +64,7 @@ irb(main):004:0> members.first
 
 ## Tests
 
-Hulse uses `MiniTest` for development. To run the tests, do `rake test`.
+Hulse uses `MiniTest` for development. To run the tests: `rake test`.
 
 ## Authors
 
