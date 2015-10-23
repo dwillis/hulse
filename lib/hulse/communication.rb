@@ -13,7 +13,7 @@ module Hulse
       id
     end
 
-    def self.executive
+    def self.presidential
       comms = []
       doc = HTTParty.get("https://www.congress.gov/communications?q=%7B%22communication-code%22%3A%22PM%22%7D&pageSize=250")
       html = Nokogiri::HTML(doc.parsed_response)
@@ -23,9 +23,19 @@ module Hulse
       comms
     end
 
+    def self.executive
+      comms = []
+      doc = HTTParty.get("https://www.congress.gov/communications?q=%7B%22communication-code%22%3A%22EC%22%7D&pageSize=250")
+      html = Nokogiri::HTML(doc.parsed_response)
+      (html/:ol/:li).each do |row|
+        comms << create(row)
+      end
+      comms
+    end
+
     def self.create(row)
       self.new(id: row.children[3].children[0].text,
-        date: Date.parse(row.children[3].children[1].text.split[1]),
+        date: Date.strptime(row.children[3].children[1].text.split[1], "%m/%d/%Y"),
         committee: row.children[3].children[1].text.split[3] + ' ' + row.children[3].children[1].text.split[4],
         url: (row/:h2).first.children.find(:a).first['href'],
         text: row.children[4].text.strip
