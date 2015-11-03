@@ -25,4 +25,5 @@ Gem::Specification.new do |spec|
   spec.add_dependency "nokogiri"
   spec.add_dependency "oj"
   spec.add_dependency "american_date"
+  spec.add_dependency "activesupport"
 end
