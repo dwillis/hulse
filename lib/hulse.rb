@@ -10,6 +10,7 @@ require "hulse/house_member"
 require "hulse/house_floor"
 require "hulse/senate_vote"
 require "hulse/senate_member"
+require "active_support/core_ext/integer/inflections"
 
 module Hulse
   class Utils
@@ -26,6 +27,24 @@ module Hulse
       return [congress, session]
     end
 
+    def self.bill_url(congress, bill_number)
+      bill_title = bill_number.scan(/[A-Z]+/).join.upcase
+      if bill_title == 'HR'
+        bt = 'house-bill'
+      elsif bill_title == 'HRES'
+        bt = 'house-resolution'
+      elsif bill_title == 'HJRES'
+        bt = 'house-joint-resolution'
+      elsif bill_title == 'S'
+        bt = 'senate-bill'
+      elsif bill_title == 'SRES'
+        bt = 'senate-resolution'
+      elsif bill_title == 'SJRES'
+        bt = 'senate-joint-resolution'
+      end
+      bill_num = bill_number.scan(/\d/).join
+      "https://www.congress.gov/bill/#{congress.to_i.ordinalize.to_s}-congress/#{bt}/#{bill_num}"
+    end
 
   end
 end

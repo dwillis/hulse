@@ -2,7 +2,7 @@ module Hulse
   class HouseVote
 
     attr_reader :majority, :congress, :session, :chamber, :vote_number, :bill_number, :question, :vote_type, :vote_result, :vote_timestamp, :description,
-    :party_summary, :vote_count, :members, :amendment_number, :amendment_author
+    :party_summary, :vote_count, :members, :amendment_number, :amendment_author, :bill_url
 
     def initialize(params={})
       params.each_pair do |k,v|
@@ -51,6 +51,7 @@ module Hulse
         chamber: response['vote_metadata']['chamber'],
         vote_number: response['vote_metadata']['rollcall_num'].to_i,
         bill_number: response['vote_metadata']['legis_num'],
+        bill_url: response['vote_metadata']['legis_num'] ? Hulse::Utils.bill_url(response['vote_metadata']['congress'], response['vote_metadata']['legis_num']) : nil,
         question: response['vote_metadata']['vote_question'],
         amendment_number: response['vote_metadata']['amendment_num'],
         amendment_author: response['vote_metadata']['amendment_author'],

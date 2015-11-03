@@ -3,7 +3,7 @@ module Hulse
 
     attr_reader :congress, :session, :year, :vote_number, :vote_timestamp, :updated_at, :vote_question_text, :vote_document_text,
     :vote_result_text, :question, :vote_title, :majority_requirement, :vote_result, :document, :amendment, :vote_count, :tie_breaker, :members,
-    :vote_date, :issue
+    :vote_date, :issue, :bill_url, :nomination_url
 
     def initialize(params={})
       params.each_pair do |k,v|
@@ -60,5 +60,22 @@ module Hulse
       votes.map{|v| self.new(congress: congress, session: session, year: year, vote_number: v['vote_number'], vote_date: Date.strptime(v['vote_date']+"-#{year}", "%d-%b-%Y"), issue: v['issue'],
         question: v['question'], vote_result: v['result'], vote_count: v['vote_tally'].inject({}){|memo,(k,v)| memo[k.to_sym] = v; memo}, vote_title: v['title'])}
     end
+
+    def is_nomination_vote?
+      document[:document_type] == 'PN' ? true : false
+    end
+
+    def nomination_url
+      "https://www.congress.gov/nomination/#{congress.to_i.ordinalize.to_s}-congress/#{document[:document_number].to_s}" if document[:document_type] == 'PN'
+    end
+
+    def bill_url
+      if document[:document_name] and document[:document_type] != 'PN'
+        Hulse::Utils.bill_url(congress, document[:document_name].gsub('.',''))
+      else
+        nil
+      end
+    end
+
   end
 end
