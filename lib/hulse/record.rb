@@ -100,5 +100,12 @@ module Hulse
     def committee_leaves_of_absence
       topics.select{|l| l[:title].include?("COMMITTEE LEAVE OF ABSENCE")}
     end
+
+    def get_text(url)
+      doc = HTTParty.get(url)
+      html = Nokogiri::HTML(doc.parsed_response)
+      (html/:pre).text.strip.delete!("\n").gsub('          ',' ')
+    end
+
   end
 end
