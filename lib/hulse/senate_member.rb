@@ -16,6 +16,18 @@ module Hulse
       self.create_from_xml(response)
     end
 
+    def self.congressdotgov(congress)
+      results = []
+      url = "https://www.congress.gov/sponsors-cosponsors/#{congress.to_i.ordinalize.to_s}-congress/senators/all"
+      response = HTTParty.get(url)
+      html = Nokogiri::HTML(response.parsed_response)
+      table = (html/:table).first
+      (table/:tr)[1..-1].each do |row|
+        results << { bioguide_id: (row/:td).first.children.first['href'].split('/').last, member_url: (row/:td).first.children.first['href'], sponsored_bills: (row/:td)[1].text.gsub(' Sponsored','').to_i, cosponsored_bills: (row/:td)[2].text.gsub(' Cosponsored','').to_i}
+      end
+      results
+    end
+
 
     def self.create_from_xml(response)
       members = []
