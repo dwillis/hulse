@@ -15,6 +15,11 @@ require "active_support/core_ext/integer/inflections"
 module Hulse
   class Utils
 
+
+    def self.current_congress
+      114
+    end
+
     # this function is more intuitive when you solve for the other side:
     # year = 1789 + (2 * (congress - 1))
     def self.congress_for_year(year)
