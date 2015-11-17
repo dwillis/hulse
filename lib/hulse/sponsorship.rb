@@ -16,6 +16,16 @@ module Hulse
       Nokogiri::HTML(doc.parsed_response)
     end
 
+    def self.totals(congress)
+      results = []
+      html = fetch(base_url(congress))
+      table = (html/:table).first
+      (table/:tr)[1..-1].each do |row|
+        results << { bioguide_id: (row/:td).first.children.first['href'].split('/').last, member_url: (row/:td).first.children.first['href'], sponsored_bills: (row/:td)[1].text.gsub(' Sponsored','').to_i, cosponsored_bills: (row/:td)[2].text.gsub(' Cosponsored','').to_i}
+      end
+      results
+    end
+
     def self.member_details(url, congress)
       sponsored_bills = []
       cosponsored_bills = []

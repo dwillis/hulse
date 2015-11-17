@@ -10,6 +10,7 @@ require "hulse/house_member"
 require "hulse/house_floor"
 require "hulse/senate_vote"
 require "hulse/senate_member"
+require "hulse/sponsorship"
 require "active_support/core_ext/integer/inflections"
 
 module Hulse
