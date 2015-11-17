@@ -13,7 +13,8 @@ module Hulse
     def self.current
       url = "http://www.senate.gov/general/contact_information/senators_cfm.xml"
       response = HTTParty.get(url)
-      self.create_from_xml(response)
+      congressdotgov_results = congressdotgov(Hulse::Utils.current_congress)
+      self.create_from_xml(response, congressdotgov_results)
     end
 
     def self.congressdotgov(congress)
@@ -28,10 +29,10 @@ module Hulse
       results
     end
 
-
-    def self.create_from_xml(response)
+    def self.create_from_xml(response, congressdotgov_results)
       members = []
       response['contact_information']['member'].each do |member|
+        dotgov = congressdotgov_results.detect{|c| c[:bioguide_id] == member['bioguide_id']}
         members << self.new(bioguide_id: member['bioguide_id'],
           title: member['member_full'],
           last_name: member['last_name'],
@@ -42,7 +43,10 @@ module Hulse
           address: member['address'],
           phone: member['phone'],
           email: member['email'],
-          website: member['website']
+          website: member['website'],
+          sponsored_bills: dotgov[:sponsored_bills],
+          cosponsored_bills: dotgov[:cosponsored_bills],
+          congressdotgov_url: dotgov[:member_url]
         )
       end
       members
