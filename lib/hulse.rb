@@ -34,23 +34,35 @@ module Hulse
       return [congress, session]
     end
 
-    def self.bill_url(congress, bill_number)
+    def self.bill_type(bill_number)
+      bt = {}
       bill_title = bill_number.scan(/[A-Z]+/).join.upcase
       if bill_title == 'HR'
-        bt = 'house-bill'
+        bt['segment'] = 'house-bill'
+        bt['title'] = 'House bill'
       elsif bill_title == 'HRES'
-        bt = 'house-resolution'
+        bt['segment'] = 'house-resolution'
+        bt['title'] = 'House resolution'
       elsif bill_title == 'HJRES'
-        bt = 'house-joint-resolution'
+        bt['segment'] = 'house-joint-resolution'
+        bt['title'] = 'House joint resolution'
       elsif bill_title == 'S'
-        bt = 'senate-bill'
+        bt['segment'] = 'senate-bill'
+        bt['title'] = 'Senate bill'
       elsif bill_title == 'SRES'
-        bt = 'senate-resolution'
+        bt['segment'] = 'senate-resolution'
+        bt['title'] = 'Senate resolution'
       elsif bill_title == 'SJRES'
-        bt = 'senate-joint-resolution'
+        bt['segment'] = 'senate-joint-resolution'
+        bt['title'] = 'Senate joint resolution'
       end
+      bt
+    end
+
+    def self.bill_url(congress, bill_number)
+      bt = bill_type(bill_number)
       bill_num = bill_number.scan(/\d/).join
-      "https://www.congress.gov/bill/#{congress.to_i.ordinalize.to_s}-congress/#{bt}/#{bill_num}"
+      "https://www.congress.gov/bill/#{congress.to_i.ordinalize.to_s}-congress/#{bt['segment']}/#{bill_num}"
     end
 
   end

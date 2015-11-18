@@ -1,6 +1,8 @@
 module Hulse
   class Bill
 
+    attr_reader :url, :number, :title, :sponsor_url, :sponsor_bioguide, :sponsor_party, :sponsor_state, :introduced_date, :bill_type, :committees,
+    :latest_action_text, :latest_action_date, :status
 
     def initialize(params={})
       params.each_pair do |k,v|
@@ -13,6 +15,11 @@ module Hulse
       Nokogiri::HTML(doc.parsed_response)
     end
 
+    def self.create_from_results(results)
+      bills = []
+      bills << results.map{|r| self.new(r)}
+    end
+
     def self.scrape_page(html)
       results = []
       html.css('ol.results_list h2').each do |bill|
@@ -21,14 +28,22 @@ module Hulse
         next if bill.next.next.text == 'Reserved for the Minority Leader.'
         puts bill.children.first.children.text
         table = bill.next.next.next.next
+        committees = table.css('tr').detect{|row| row.children[1].text == 'Committees:'}
+        if committees
+          cmtes = committees.children[3].text.strip
+        else
+          cmtes = nil
+        end
         latest_action = table.css('tr').detect{|row| row.children[1].text == 'Latest Action:'}
+        tracker = table.css('tr').detect{|row| row.children[1].text == 'Tracker:'}
         party, state = table.css('tr').first.children[3].children.first.text.split('[').last.split('-').first(2)
         results << {url: bill.children.first['href'], number: bill.children.first.children.text, title: bill.next.next.text,
         sponsor_url: table.css('tr').first.children[3].children.first['href'], sponsor_bioguide: table.css('tr').first.children[3].children.first['href'].split('/').last,
-        party: party, state: state, introduced: table.css('tr').first.children[3].children.last.text.strip.split.last,
-        committees: table.css('tr')[1].children[3].text.strip, latest_action_text: latest_action.children[3].children.first.text, latest_action_date: latest_action.children[3].children.first.text.split.first }
+        sponsor_party: party, sponsor_state: state.gsub(']',''), introduced_date: table.css('tr').first.children[3].children.last.text.strip.split.last, bill_type: Hulse::Utils.bill_type(bill.children.first.children.text)['title'],
+        committees: cmtes, latest_action_text: latest_action.children[3].children.first.text, latest_action_date: latest_action.children[3].children.first.text.split.first,
+        status: tracker.children[3].children.first.text.gsub('This bill has the status','').strip}
       end
-      results
+      create_from_results(results)
     end
 
     def self.scrape_congress(congress)
