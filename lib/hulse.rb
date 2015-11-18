@@ -3,6 +3,7 @@ require 'oj'
 require 'nokogiri'
 require 'htmlentities'
 require "hulse/version"
+require "hulse/bill"
 require "hulse/record"
 require "hulse/communication"
 require "hulse/house_vote"
