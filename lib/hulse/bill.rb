@@ -2,7 +2,7 @@ module Hulse
   class Bill
 
     attr_reader :url, :number, :title, :sponsor_url, :sponsor_bioguide, :sponsor_party, :sponsor_state, :introduced_date, :bill_type, :committees,
-    :latest_action_text, :latest_action_date, :status
+    :latest_action_text, :latest_action_date, :status, :actions_url
 
     def initialize(params={})
       params.each_pair do |k,v|
@@ -28,22 +28,54 @@ module Hulse
         next if bill.next.next.text == 'Reserved for the Minority Leader.'
         puts bill.children.first.children.text
         table = bill.next.next.next.next
-        committees = table.css('tr').detect{|row| row.children[1].text == 'Committees:'}
-        if committees
-          cmtes = committees.children[3].text.strip
-        else
-          cmtes = nil
-        end
-        latest_action = table.css('tr').detect{|row| row.children[1].text == 'Latest Action:'}
-        tracker = table.css('tr').detect{|row| row.children[1].text == 'Tracker:'}
-        party, state = table.css('tr').first.children[3].children.first.text.split('[').last.split('-').first(2)
+        cmtes = get_committees(table)
+        latest_action = get_latest_action(table)
+        status_tracker = get_status_tracker(table)
+        party, state = get_party_and_state(table)
+        sponsor_url, sponsor_bioguide = get_sponsor(table)
+        introduced_date = get_introduced_date(table)
+        latest_action_text, latest_action_date = get_latest_action(table)
         results << {url: bill.children.first['href'], number: bill.children.first.children.text, title: bill.next.next.text,
-        sponsor_url: table.css('tr').first.children[3].children.first['href'], sponsor_bioguide: table.css('tr').first.children[3].children.first['href'].split('/').last,
-        sponsor_party: party, sponsor_state: state.gsub(']',''), introduced_date: table.css('tr').first.children[3].children.last.text.strip.split.last, bill_type: Hulse::Utils.bill_type(bill.children.first.children.text)['title'],
-        committees: cmtes, latest_action_text: latest_action.children[3].children.first.text, latest_action_date: latest_action.children[3].children.first.text.split.first,
-        status: tracker.children[3].children.first.text.gsub('This bill has the status','').strip}
+        sponsor_url: sponsor_url, sponsor_bioguide: sponsor_bioguide, sponsor_party: party, sponsor_state: state.gsub(']',''),
+        introduced_date: introduced_date, bill_type: Hulse::Utils.bill_type(bill.children.first.children.text)['title'],
+        committees: cmtes, latest_action_text: latest_action, latest_action_date: latest_action_date, status: status_tracker}
       end
       create_from_results(results)
+    end
+
+    def self.get_committees(table)
+      committees = table.css('tr').detect{|row| row.children[1].text == 'Committees:'}
+      if committees
+        cmtes = committees.children[3].text.strip
+      else
+        cmtes = nil
+      end
+      cmtes
+    end
+
+    def self.get_introduced_date(table)
+      table.css('tr').first.children[3].children.last.text.strip.split.last.gsub(')','')
+    end
+
+    def self.get_sponsor(table)
+      url = table.css('tr').first.children[3].children.first['href']
+      bioguide_id = table.css('tr').first.children[3].children.first['href'].split('/').last
+      [url, bioguide_id]
+    end
+
+    def self.get_latest_action(table)
+      text = table.css('tr').detect{|row| row.children[1].text == 'Latest Action:'}.children[3].children.first.text
+      date = table.css('tr').detect{|row| row.children[1].text == 'Latest Action:'}.children[3].children.first.text.split.first
+      [text, date]
+    end
+
+    def self.get_status_tracker(table)
+      tr = table.css('tr').detect{|row| row.children[1].text == 'Tracker:'}
+      tr.children[3].children.first.text.gsub('This bill has the status','').strip
+    end
+
+    def self.get_party_and_state(table)
+      table.css('tr').first.children[3].children.first.text.split('[').last.split('-').first(2)
     end
 
     def self.scrape_congress(congress)
@@ -57,6 +89,32 @@ module Hulse
         results << scrape_page(html)
       end
       results.flatten
+    end
+
+    def self.get_major_recorded_votes(html)
+
+    end
+
+    def self.scrape_bill(url)
+      doc = HTTParty.get(url)
+      html = Nokogiri::HTML(doc.parsed_response)
+      table = html.css('table.standard01')
+      cmtes = get_committees(table)
+      latest_action = get_latest_action(table)
+      status_tracker = html.css('p.hide_fromsighted').children.first.text.gsub('This bill has the status','').strip
+      party, state = get_party_and_state(table)
+      sponsor_url, sponsor_bioguide = get_sponsor(table)
+      introduced_date = get_introduced_date(table)
+      latest_action_text, latest_action_date = get_latest_action(table)
+      results = {url: url, number: , title: ,
+      sponsor_url: sponsor_url, sponsor_bioguide: sponsor_bioguide, sponsor_party: party, sponsor_state: state.gsub(']',''),
+      introduced_date: introduced_date, bill_type: Hulse::Utils.bill_type(TKTK)['title'],
+      committees: cmtes, latest_action_text: latest_action, latest_action_date: latest_action_date, status: status_tracker}
+      create_from_results([results])
+    end
+
+    def actions_url
+      url + '/all-actions'
     end
 
 
