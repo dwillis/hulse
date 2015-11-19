@@ -20,6 +20,10 @@ module Hulse
       bills << results.map{|r| self.new(r)}
     end
 
+    def self.create_from_result(result)
+      self.new(result)
+    end
+
     def self.scrape_page(html)
       results = []
       html.css('ol.results_list h2').each do |bill|
@@ -54,7 +58,7 @@ module Hulse
     end
 
     def self.get_introduced_date(table)
-      table.css('tr').first.children[3].children.last.text.strip.split.last.gsub(')','')
+      Date.strptime(table.css('tr').first.children[3].children.last.text.strip.split.last.gsub(')',''), '%m/%d/%Y')
     end
 
     def self.get_sponsor(table)
@@ -64,8 +68,8 @@ module Hulse
     end
 
     def self.get_latest_action(table)
-      text = table.css('tr').detect{|row| row.children[1].text == 'Latest Action:'}.children[3].children.first.text
-      date = table.css('tr').detect{|row| row.children[1].text == 'Latest Action:'}.children[3].children.first.text.split.first
+      text = table.css('tr').detect{|row| row.children[1].text == 'Latest Action:'}.children[3].children.first.text.split("(").first.strip
+      date = Date.strptime(table.css('tr').detect{|row| row.children[1].text == 'Latest Action:'}.children[3].children.first.text.split.first, '%m/%d/%Y')
       [text, date]
     end
 
@@ -98,6 +102,7 @@ module Hulse
     def self.scrape_bill(url)
       doc = HTTParty.get(url)
       html = Nokogiri::HTML(doc.parsed_response)
+      bill_number, title = html.css('h1').first.children.first.text.split(' - ')
       table = html.css('table.standard01')
       cmtes = get_committees(table)
       latest_action = get_latest_action(table)
@@ -106,15 +111,19 @@ module Hulse
       sponsor_url, sponsor_bioguide = get_sponsor(table)
       introduced_date = get_introduced_date(table)
       latest_action_text, latest_action_date = get_latest_action(table)
-      results = {url: url, number: , title: ,
-      sponsor_url: sponsor_url, sponsor_bioguide: sponsor_bioguide, sponsor_party: party, sponsor_state: state.gsub(']',''),
-      introduced_date: introduced_date, bill_type: Hulse::Utils.bill_type(TKTK)['title'],
-      committees: cmtes, latest_action_text: latest_action, latest_action_date: latest_action_date, status: status_tracker}
-      create_from_results([results])
+      create_from_result({url: url, number: bill_number, title: title, sponsor_url: sponsor_url, sponsor_bioguide: sponsor_bioguide,
+      sponsor_party: party, sponsor_state: state.gsub(']',''), introduced_date: introduced_date, bill_type: Hulse::Utils.bill_type(bill_number)['title'],
+      committees: cmtes, latest_action_text: latest_action, latest_action_date: latest_action_date, status: status_tracker})
     end
 
     def actions_url
       url + '/all-actions'
+    end
+
+    def actions
+      doc = HTTParty.get(actions_url)
+      html = Nokogiri::HTML(doc.parsed_response)
+
     end
 
 
