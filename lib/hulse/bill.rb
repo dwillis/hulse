@@ -95,10 +95,6 @@ module Hulse
       results.flatten
     end
 
-    def self.get_major_recorded_votes(html)
-
-    end
-
     def self.scrape_bill(url)
       doc = HTTParty.get(url)
       html = Nokogiri::HTML(doc.parsed_response)
@@ -121,9 +117,17 @@ module Hulse
     end
 
     def actions
+      actions = []
       doc = HTTParty.get(actions_url)
       html = Nokogiri::HTML(doc.parsed_response)
-
+      table = html.css("table.item_table")
+      table.css('tr')[1..-1].each do |row|
+        actions << {date: Date.strptime(row.css('td').first.text, "%m/%d/%Y"), action: row.css('td').last.children.first.text.strip,
+          action_type: row.css('td').last.children[3].children.first.text.strip.split("Type of Action: ").last,
+          action_by: row.css('td').last.children[3].children.last.text.strip.split("Action By: ").last
+        }
+      end
+      actions
     end
 
 
