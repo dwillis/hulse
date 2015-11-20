@@ -112,6 +112,10 @@ module Hulse
       committees: cmtes, latest_action_text: latest_action, latest_action_date: latest_action_date, status: status_tracker})
     end
 
+    def chamber
+      number.chars.first == 'H' ? 'House' : 'Senate'
+    end
+
     def actions_url
       url + '/all-actions'
     end
@@ -121,14 +125,55 @@ module Hulse
       doc = HTTParty.get(actions_url)
       html = Nokogiri::HTML(doc.parsed_response)
       table = html.css("table.item_table")
+      ch = true if table.css('tr')[0].children[3].text == 'Chamber'
       table.css('tr')[1..-1].each do |row|
-        actions << {date: Date.strptime(row.css('td').first.text, "%m/%d/%Y"), action: row.css('td').last.children.first.text.strip,
-          action_type: row.css('td').last.children[3].children.first.text.strip.split("Type of Action: ").last,
-          action_by: row.css('td').last.children[3].children.last.text.strip.split("Action By: ").last
-        }
+        if row.css('td').last.children.detect{|r| r.text.strip.include?('Type of Action')}.nil?
+          action_type = nil
+          action_by = nil
+        else
+          action_type = row.css('td').last.children.detect{|r| r.text.strip.include?('Type of Action')}.children[0].text.strip.split("Type of Action: ").last
+          action_by = row.css('td').last.children.detect{|r| r.text.strip.include?('Action By')}.children[2].text.strip.split("Action By: ").last
+        end
+        if ch
+          actions << {date: Date.strptime(row.css('td').first.text, "%m/%d/%Y"), chamber: row.css('td')[1].text, action: row.css('td').last.children.first.text.strip,
+            action_type: action_type, action_by: action_by
+          }
+        else
+          actions << {date: Date.strptime(row.css('td').first.text, "%m/%d/%Y"), chamber: chamber, action: row.css('td').last.children.first.text.strip,
+            action_type: row.css('td').last.children[3].children.first.text.strip.split("Type of Action: ").last,
+            action_by: row.css('td').last.children[3].children.last.text.strip.split("Action By: ").last
+          }
+        end
       end
       actions
     end
+
+    def related_bills_url
+      url + '/related-bills'
+    end
+
+    def related_bills
+      related_bills = []
+      doc = HTTParty.get(related_bills_url)
+      html = Nokogiri::HTML(doc.parsed_response)
+      table = html.css("table.item_table.relatedBills")
+      return [] if table.css('tr')[1..-1].nil?
+      table.css('tr')[1..-1].each do |row|
+        next if row.css('td').first.children[1].nil?
+        related_bills << {bill_number: row.css('td').first.children[1].text, title: row.css('td')[1].text,
+          relationship: row.css('td')[2].text, identified_by: row.css('td')[3].text, latest_action_text: row.css('td')[4].text
+        }
+      end
+      related_bills
+    end
+
+    def amendments_url
+      url + '/amendments'
+    end
+
+
+
+
 
 
   end

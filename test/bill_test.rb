@@ -6,7 +6,8 @@ module Hulse
 
     def setup
       @bill = Bill.scrape_bill("https://www.congress.gov/bill/113th-congress/house-bill/1206")
-      @other_bill = Bill.scrape_bill("https://www.congress.gov/bill/113th-congress/house-bill/5784")
+      @other_bill = Bill.scrape_bill("https://www.congress.gov/bill/114th-congress/house-bill/22")
+      @third_bill = Bill.scrape_bill("https://www.congress.gov/bill/113th-congress/house-bill/5890")
     end
 
     def test_bill_sponsor_details
@@ -16,13 +17,19 @@ module Hulse
     end
 
     def test_bill_committees
-      assert_equal @other_bill.committees, "House - Veterans' Affairs"
-      assert_equal @other_bill.latest_action_date, Date.parse("2014-12-23")
+      assert_equal @other_bill.committees, "House - Ways and Means | Senate - Finance"
+      assert_equal @other_bill.latest_action_date, Date.parse("2015-11-18")
     end
 
     def test_bill_actions
-      assert_equal @other_bill.actions.size, 3
-      assert_equal @other_bill.actions.first[:action_by], "House Veterans' Affairs"
+      assert_equal @other_bill.actions.size, 477
+      assert_equal @bill.actions.size, 24
+      assert_equal @third_bill.actions.size, 3
+    end
+
+    def test_related_bills
+      assert_equal @bill.related_bills.size, 7
+      assert_equal @third_bill.related_bills.size, 0
     end
 
   end
