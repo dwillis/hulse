@@ -2,7 +2,7 @@ module Hulse
   class Bill
 
     attr_reader :url, :number, :title, :sponsor_url, :sponsor_bioguide, :sponsor_party, :sponsor_state, :introduced_date, :bill_type, :committees,
-    :latest_action_text, :latest_action_date, :status, :actions_url
+    :latest_action_text, :latest_action_date, :status, :actions_url, :chamber
 
     def initialize(params={})
       params.each_pair do |k,v|
@@ -168,10 +168,12 @@ module Hulse
     end
 
     def amendments_url
-      url + '/amendments'
+      url + '/amendments?pageSize=250'
     end
 
-
+    def amendments
+      Amendment.scrape_amendments(amendments_url)
+    end
 
 
 

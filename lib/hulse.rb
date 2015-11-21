@@ -5,6 +5,7 @@ require 'htmlentities'
 require "hulse/version"
 require "hulse/bill"
 require "hulse/record"
+require "hulse/amendment"
 require "hulse/communication"
 require "hulse/house_vote"
 require "hulse/house_member"

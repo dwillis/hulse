@@ -32,5 +32,9 @@ module Hulse
       assert_equal @third_bill.related_bills.size, 0
     end
 
+    def test_amendments
+      assert_equal @other_bill.amendments.size, 379
+    end
+
   end
 end
