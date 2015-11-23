@@ -10,8 +10,7 @@ module Hulse
     end
 
     def self.create_from_results(results)
-      amendments = []
-      amendments << results.map{|r| self.new(r)}
+      results.map{|r| self.new(r)}
     end
 
     def self.create_from_result(result)
@@ -44,13 +43,8 @@ module Hulse
       end
     end
 
-    def self.scrape_amendments(amendments_url)
+    def self.parse_html(html)
       amendments = []
-      doc = HTTParty.get(amendments_url)
-      html = Nokogiri::HTML(doc.parsed_response)
-      total = html.css('strong').first.next.text.strip.split('of ').last.to_i
-      max_page = (total.to_f/250.0).round
-      # process first page
       html.css('ol.results_list li').each do |row|
         headers = row.css('tr').map{|r| r.css('th').text}
         if headers.size == 2
@@ -62,12 +56,26 @@ module Hulse
         latest_action_date = get_latest_action_date(row, td)
         bioguide, party, state = get_bioguide_party_and_state(row, td)
         amendments << { url: row.css('h2').first.children.first['href'], number: row.css('h2').first.children.first.text, sponsor_url: row.css('td')[td].children.first['href'],
-        sponsor_bioguide: bioguide , sponsor_party: party, sponsor_state: state, sponsor_name: nil,
-        offered_date: offered_date,
-        latest_action_text: row.css('td')[td+1].text.strip, latest_action_date: latest_action_date
+        sponsor_bioguide: bioguide , sponsor_party: party, sponsor_state: state, sponsor_name: nil, offered_date: offered_date, latest_action_text: row.css('td')[td+1].text.strip, latest_action_date: latest_action_date
         }
       end
-      create_from_results(amendments)
+      amendments
+    end
+
+    def self.scrape_amendments(amendments_url)
+      amendments = []
+      doc = HTTParty.get(amendments_url)
+      html = Nokogiri::HTML(doc.parsed_response)
+      total = html.css('strong').first.next.text.strip.split('of ').last.to_i
+      max_page = (total.to_f/250.0).round
+      amendments << parse_html(html)
+      (2..max_page).each do |page|
+        doc = HTTParty.get(amendments_url+"&page=#{page}")
+        html = Nokogiri::HTML(doc.parsed_response)
+        amendments << parse_html(html)
+      end
+      # process other pages
+      create_from_results(amendments.flatten)
     end
 
     def chamber

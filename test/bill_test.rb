@@ -22,7 +22,7 @@ module Hulse
     end
 
     def test_bill_actions
-      assert_equal @other_bill.actions.size, 477
+      assert_equal @other_bill.actions.size, 478
       assert_equal @bill.actions.size, 24
       assert_equal @third_bill.actions.size, 3
     end
