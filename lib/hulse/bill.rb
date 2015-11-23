@@ -1,8 +1,10 @@
 module Hulse
   class Bill
+    extend Memoist
 
     attr_reader :url, :number, :title, :sponsor_url, :sponsor_bioguide, :sponsor_party, :sponsor_state, :introduced_date, :bill_type, :committees,
-    :latest_action_text, :latest_action_date, :status, :actions_url, :chamber, :amendments
+    :latest_action_text, :latest_action_date, :status, :actions_url, :chamber, :amendments, :cosponsors, :total_cosponsors, :bipartisan_cosponsors,
+    :republican_cospsonsors, :democratic_cosponsors, :independent_cosponsors
 
     def initialize(params={})
       params.each_pair do |k,v|
@@ -42,7 +44,8 @@ module Hulse
         results << {url: bill.children.first['href'], number: bill.children.first.children.text, title: bill.next.next.text,
         sponsor_url: sponsor_url, sponsor_bioguide: sponsor_bioguide, sponsor_party: party, sponsor_state: state.gsub(']',''),
         introduced_date: introduced_date, bill_type: Hulse::Utils.bill_type(bill.children.first.children.text)['title'],
-        committees: cmtes, latest_action_text: latest_action, latest_action_date: latest_action_date, status: status_tracker}
+        committees: cmtes, latest_action_text: latest_action, latest_action_date: latest_action_date, status: status_tracker,
+        amendments: nil, cosponsors: nil, related_bills: nil}
       end
       create_from_results(results)
     end
@@ -78,8 +81,8 @@ module Hulse
       tr.children[3].children.first.text.gsub('This bill has the status','').strip
     end
 
-    def self.get_party_and_state(table)
-      table.css('tr').first.children[3].children.first.text.split('[').last.split('-').first(2)
+    def self.get_party_and_state(html)
+      html.text.split('[').last.split('-').first(2)
     end
 
     def self.scrape_congress(congress)
@@ -103,13 +106,13 @@ module Hulse
       cmtes = get_committees(table)
       latest_action = get_latest_action(table)
       status_tracker = html.css('p.hide_fromsighted').children.first.text.gsub('This bill has the status','').strip
-      party, state = get_party_and_state(table)
+      party, state = get_party_and_state(table.css('tr').first.children[3].children.first)
       sponsor_url, sponsor_bioguide = get_sponsor(table)
       introduced_date = get_introduced_date(table)
       latest_action_text, latest_action_date = get_latest_action(table)
       create_from_result({url: url, number: bill_number, title: title, sponsor_url: sponsor_url, sponsor_bioguide: sponsor_bioguide,
       sponsor_party: party, sponsor_state: state.gsub(']',''), introduced_date: introduced_date, bill_type: Hulse::Utils.bill_type(bill_number)['title'],
-      committees: cmtes, latest_action_text: latest_action, latest_action_date: latest_action_date, status: status_tracker})
+      committees: cmtes, latest_action_text: latest_action, latest_action_date: latest_action_date, status: status_tracker, amendments: nil, cosponsors: nil, related_bills: nil})
     end
 
     def chamber
@@ -121,6 +124,10 @@ module Hulse
     end
 
     def actions
+      get_actions
+    end
+
+    def get_actions
       actions = []
       doc = HTTParty.get(actions_url)
       html = Nokogiri::HTML(doc.parsed_response)
@@ -153,6 +160,10 @@ module Hulse
     end
 
     def related_bills
+      get_related_bills
+    end
+
+    def get_related_bills
       related_bills = []
       doc = HTTParty.get(related_bills_url)
       html = Nokogiri::HTML(doc.parsed_response)
@@ -172,8 +183,57 @@ module Hulse
     end
 
     def amendments
+      get_amendments
+    end
+
+    def get_amendments
       Amendment.scrape_amendments(amendments_url)
     end
 
+    def cosponsors_url
+      url + '/cosponsors'
+    end
+
+    def cosponsors
+      get_cosponsors
+    end
+
+    def get_cosponsors
+      cosponsors = []
+      doc = HTTParty.get(cosponsors_url)
+      html = Nokogiri::HTML(doc.parsed_response)
+      table = html.css("table.item_table")
+      return [] if table.css('tr')[1..-1].nil?
+      table.css('tr')[1..-1].each do |row|
+        next if row.css('td').first.children[1].nil?
+        original = row.css('td').first.children[1].text.chars.last == '*' ? true : false
+        party, state = Bill.get_party_and_state(row.css('td').first.children[1])
+        cosponsors << {cosponsor_name: row.css('td').first.children[1].text, date: Date.strptime(row.css('td')[1].text, "%m/%d/%Y"),
+          cosponsor_url: row.css('td').first.children[1]['href'], cosponsor_party: party, cosponsor_state: state, original: original}
+      end
+      cosponsors
+    end
+
+    def total_cosponsors
+      cosponsors.size
+    end
+
+    def bipartisan_cosponsors?
+      cosponsors.map{|s| s[:cosponsor_party]}.uniq == sponsor_party ? false : true
+    end
+
+    def republican_cospsonsors
+      cosponsors.map{|s| s[:cosponsor_party] == 'R'}
+    end
+
+    def democratic_cosponsors
+      cosponsors.map{|s| s[:cosponsor_party] == 'D'}
+    end
+
+    def independent_cosponsors
+      cosponsors.map{|s| s[:cosponsor_party] == 'I'}
+    end
+
+    memoize :cosponsors, :actions, :amendments, :related_bills
   end
 end

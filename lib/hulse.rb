@@ -2,6 +2,7 @@ require 'httparty'
 require 'oj'
 require 'nokogiri'
 require 'htmlentities'
+require 'memoist'
 require "hulse/version"
 require "hulse/bill"
 require "hulse/record"

@@ -36,5 +36,14 @@ module Hulse
       assert_equal @other_bill.amendments.size, 379
     end
 
+    def test_cosponsors
+      assert_equal @other_bill.cosponsors.size, 118
+    end
+
+    def test_party_cosponsors
+      assert_equal @bill.bipartisan_cosponsors?, true
+      assert_equal @bill.democratic_cosponsors.size, 1
+    end
+
   end
 end
