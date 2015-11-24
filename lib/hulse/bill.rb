@@ -4,7 +4,7 @@ module Hulse
 
     attr_reader :url, :number, :title, :sponsor_url, :sponsor_bioguide, :sponsor_party, :sponsor_state, :introduced_date, :bill_type, :committees,
     :latest_action_text, :latest_action_date, :status, :actions_url, :chamber, :amendments, :cosponsors, :total_cosponsors, :bipartisan_cosponsors,
-    :republican_cospsonsors, :democratic_cosponsors, :independent_cosponsors, :versions
+    :republican_cospsonsors, :democratic_cosponsors, :independent_cosponsors, :versions, :committee_actions_url, :versions_url, :cosponsors_url
 
     def initialize(params={})
       params.each_pair do |k,v|
@@ -88,7 +88,6 @@ module Hulse
 
     def self.get_party_and_state(html)
       html.text.scan(/\[(.*)\]/).first.first.split('-').first(2)
-#      html.text.split('[').last.split('-').first(2)
     end
 
     def self.scrape_congress(congress)
@@ -251,11 +250,46 @@ module Hulse
 
     def get_versions
       versions = []
-      doc = HTTParty.get(cosponsors_url)
+      doc = HTTParty.get(versions_url)
       html = Nokogiri::HTML(doc.parsed_response)
-
+      number = html.css("label.tntFormLabel").text.strip.scan(/\d+/).first.to_i
+      html.css("select").last.children.select{|c| !c['value'].nil?}.each do |version|
+        versions << {url: versions_url+"/#{version['value']}", version: version.text.strip, stage: version['value'].upcase}
+      end
+      versions
     end
 
-    memoize :cosponsors, :actions, :amendments, :related_bills, :versions
+    def committee_actions_url
+      url + '/committees'
+    end
+
+    def committee_actions
+      get_committee_actions
+    end
+
+    def get_committee_actions
+      committee_actions = []
+      doc = HTTParty.get(committee_actions_url)
+      html = Nokogiri::HTML(doc.parsed_response)
+      table = html.css('table.table_committee')
+      return [] if table.css('tr')[1..-1].nil?
+      table.css('tr')[1..-1].each do |row|
+        next if row.text.strip == ''
+        committee = row.children[1].text unless row.children[1].text.strip == ''
+        td = row.children[1].text.strip == '' ? -2 : 0
+        if row.children[6+td].children.text == ''
+          report_url = nil
+          report_title = nil
+        else
+          report_url = "https://www.congress.gov"+row.children[6+td].children.first['href']
+          report_title = row.children[6+td].children.text
+        end
+        committee_actions << {committee: committee, date: Date.strptime(row.children[2+td].text, "%m/%d/%Y"), action: row.children[4+td].text,
+          report_url: report_url, report_title: report_title}
+      end
+      committee_actions
+    end
+
+    memoize :cosponsors, :actions, :amendments, :related_bills, :versions, :committee_actions
   end
 end
