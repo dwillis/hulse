@@ -4,7 +4,7 @@ module Hulse
 
     attr_reader :url, :number, :title, :sponsor_url, :sponsor_bioguide, :sponsor_party, :sponsor_state, :introduced_date, :bill_type, :committees,
     :latest_action_text, :latest_action_date, :status, :actions_url, :chamber, :amendments, :cosponsors, :total_cosponsors, :bipartisan_cosponsors,
-    :republican_cospsonsors, :democratic_cosponsors, :independent_cosponsors
+    :republican_cospsonsors, :democratic_cosponsors, :independent_cosponsors, :versions
 
     def initialize(params={})
       params.each_pair do |k,v|
@@ -61,7 +61,11 @@ module Hulse
     end
 
     def self.get_introduced_date(table)
-      Date.strptime(table.css('tr').first.children[3].children.last.text.strip.split.last.gsub(')',''), '%m/%d/%Y')
+      begin
+        Date.strptime(table.css('tr').first.children[3].children.last.text.strip.split[1].split(')').first, '%m/%d/%Y')
+      rescue
+        puts table.css('tr').first.children[3].children.last.text.strip
+      end
     end
 
     def self.get_sponsor(table)
@@ -71,6 +75,7 @@ module Hulse
     end
 
     def self.get_latest_action(table)
+      return [nil, nil] if table.css('tr').detect{|row| row.children[1].text == 'Latest Action:'}.children[3].children.first.text == 'Action data to be retrieved.'
       text = table.css('tr').detect{|row| row.children[1].text == 'Latest Action:'}.children[3].children.first.text.split("(").first.strip
       date = Date.strptime(table.css('tr').detect{|row| row.children[1].text == 'Latest Action:'}.children[3].children.first.text.split.first, '%m/%d/%Y')
       [text, date]
@@ -82,7 +87,8 @@ module Hulse
     end
 
     def self.get_party_and_state(html)
-      html.text.split('[').last.split('-').first(2)
+      html.text.scan(/\[(.*)\]/).first.first.split('-').first(2)
+#      html.text.split('[').last.split('-').first(2)
     end
 
     def self.scrape_congress(congress)
@@ -91,7 +97,7 @@ module Hulse
       total_bills = html.css('strong').first.next.text.strip.split('of ').last.gsub(',','').to_i
       pages = (total_bills.to_f/250.0).round
       results << scrape_page(html)
-      (1..pages).each do |page|
+      (2..pages).each do |page|
         html = fetch(congress, page)
         results << scrape_page(html)
       end
@@ -209,7 +215,8 @@ module Hulse
         original = row.css('td').first.children[1].text.chars.last == '*' ? true : false
         party, state = Bill.get_party_and_state(row.css('td').first.children[1])
         cosponsors << {cosponsor_name: row.css('td').first.children[1].text, date: Date.strptime(row.css('td')[1].text, "%m/%d/%Y"),
-          cosponsor_url: row.css('td').first.children[1]['href'], cosponsor_party: party, cosponsor_state: state, original: original}
+          cosponsor_bioguide: row.css('td').first.children[1]['href'].split('/').last, cosponsor_url: row.css('td').first.children[1]['href'],
+          cosponsor_party: party, cosponsor_state: state, original: original}
       end
       cosponsors
     end
@@ -234,6 +241,21 @@ module Hulse
       cosponsors.map{|s| s[:cosponsor_party] == 'I'}
     end
 
-    memoize :cosponsors, :actions, :amendments, :related_bills
+    def versions_url
+      url + '/text'
+    end
+
+    def versions
+      get_versions
+    end
+
+    def get_versions
+      versions = []
+      doc = HTTParty.get(cosponsors_url)
+      html = Nokogiri::HTML(doc.parsed_response)
+
+    end
+
+    memoize :cosponsors, :actions, :amendments, :related_bills, :versions
   end
 end
