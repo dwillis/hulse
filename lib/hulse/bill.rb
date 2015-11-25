@@ -273,9 +273,10 @@ module Hulse
       html = Nokogiri::HTML(doc.parsed_response)
       table = html.css('table.table_committee')
       return [] if table.css('tr')[1..-1].nil?
-      table.css('tr')[1..-1].each do |row|
+      committee_names = table.css('tr')[2..-1].map{|row| row.css('th').first.text unless row.css('th').empty?}.slice_before(&:itself).flat_map{|a| a.fill(a.first)}
+      table.css('tr')[2..-1].each_with_index do |row, i|
         next if row.text.strip == ''
-        committee = row.children[1].text unless row.children[1].text.strip == ''
+        committee = committee_names[i]
         td = row.children[1].text.strip == '' ? -2 : 0
         if row.children[6+td].children.text == ''
           report_url = nil
