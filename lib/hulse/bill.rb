@@ -120,6 +120,23 @@ module Hulse
       committees: cmtes, latest_action_text: latest_action, latest_action_date: latest_action_date, status: status_tracker, amendments: nil, cosponsors: nil, related_bills: nil})
     end
 
+    def self.most_viewed
+      most_viewed = []
+      url = "https://www.congress.gov/resources/display/content/Most-Viewed+Bills"
+      doc = HTTParty.get(url)
+      html = Nokogiri::HTML(doc.parsed_response)
+      current_week_date = Date.parse(html.css('h2').text)
+      current_week = html.css("table").first.css('tr')
+      current_week.each do |row|
+        rank = row.css('td').first.text.scan(/\d+/).first.to_i
+        bill, congress = row.css('td')[1].text.split
+        congress = congress.scan(/\d+/).first.to_i
+        title = row.css('td')[2].text.strip
+        most_viewed << [ current_week_date, rank, bill, congress, title]
+      end
+      most_viewed
+    end
+
     def chamber
       number.chars.first == 'H' ? 'House' : 'Senate'
     end
