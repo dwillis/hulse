@@ -4,7 +4,8 @@ module Hulse
 
     attr_reader :url, :number, :title, :sponsor_url, :sponsor_bioguide, :sponsor_party, :sponsor_state, :introduced_date, :bill_type, :committees,
     :latest_action_text, :latest_action_date, :status, :actions_url, :chamber, :amendments, :cosponsors, :total_cosponsors, :bipartisan_cosponsors,
-    :republican_cospsonsors, :democratic_cosponsors, :independent_cosponsors, :versions, :committee_actions_url, :versions_url, :cosponsors_url
+    :republican_cospsonsors, :democratic_cosponsors, :independent_cosponsors, :versions, :committee_actions_url, :versions_url, :cosponsors_url,
+    :subjects, :subjects_url, :policy_area
 
     def initialize(params={})
       params.each_pair do |k,v|
@@ -23,7 +24,9 @@ module Hulse
     end
 
     def self.create_from_result(result)
-      self.new(result)
+      b = self.new(result)
+      b.subjects
+      return b
     end
 
     def self.scrape_page(html)
@@ -117,7 +120,8 @@ module Hulse
       latest_action_text, latest_action_date = get_latest_action(table)
       create_from_result({url: url, number: bill_number, title: title, sponsor_url: sponsor_url, sponsor_bioguide: sponsor_bioguide,
       sponsor_party: party, sponsor_state: state.gsub(']',''), introduced_date: introduced_date, bill_type: Hulse::Utils.bill_type(bill_number)['title'],
-      committees: cmtes, latest_action_text: latest_action, latest_action_date: latest_action_date, status: status_tracker, amendments: nil, cosponsors: nil, related_bills: nil})
+      committees: cmtes, latest_action_text: latest_action, latest_action_date: latest_action_date, status: status_tracker, subjects: nil,
+      amendments: nil, cosponsors: nil, related_bills: nil})
     end
 
     def self.most_viewed
@@ -308,6 +312,26 @@ module Hulse
       committee_actions
     end
 
-    memoize :cosponsors, :actions, :amendments, :related_bills, :versions, :committee_actions
+    def subjects_url
+      url + '/subjects'
+    end
+
+    def subjects
+      get_subjects
+    end
+
+    def policy_area
+      @policy_area
+    end
+
+    def get_subjects
+      subjects = []
+      doc = HTTParty.get(subjects_url)
+      html = Nokogiri::HTML(doc.parsed_response)
+      instance_variable_set("@policy_area", html.css('ul.plain li').first.text)
+      html.css('ul.plain li')[1..-1].map{|r| r.text.strip}
+    end
+
+    memoize :cosponsors, :actions, :amendments, :related_bills, :versions, :committee_actions, :subjects, :policy_area
   end
 end

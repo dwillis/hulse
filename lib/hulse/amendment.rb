@@ -67,6 +67,7 @@ module Hulse
       amendments = []
       doc = HTTParty.get(amendments_url)
       html = Nokogiri::HTML(doc.parsed_response)
+      return [] if html.css('ol.results_list li').empty?
       total = html.css('strong').first.next.text.strip.split('of ').last.to_i
       max_page = (total.to_f/250.0).round
       amendments << parse_html(html)

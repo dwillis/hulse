@@ -9,6 +9,7 @@ module Hulse
       @other_bill = Bill.scrape_bill("https://www.congress.gov/bill/114th-congress/house-bill/22")
       @third_bill = Bill.scrape_bill("https://www.congress.gov/bill/113th-congress/house-bill/5890")
       @fourth_bill = Bill.scrape_bill("https://www.congress.gov/bill/113th-congress/senate-bill/311")
+      @fifth_bill = Bill.scrape_bill("https://www.congress.gov/bill/113th-congress/senate-bill/456")
     end
 
     def test_bill_sponsor_details
@@ -35,6 +36,7 @@ module Hulse
 
     def test_amendments
       assert_equal @other_bill.amendments.size, 379
+      assert_equal @fifth_bill.amendments.size, 0
     end
 
     def test_cosponsors
@@ -48,6 +50,10 @@ module Hulse
 
     def test_committee_actions
       assert_equal @fourth_bill.committee_actions.last[:committee], "House Natural Resources Subcommittee on Public Lands and Environmental Regulation"
+    end
+
+    def test_policy_area
+      assert_equal @fifth_bill.policy_area, "Education"
     end
 
   end
