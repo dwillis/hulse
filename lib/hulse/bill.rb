@@ -294,7 +294,8 @@ module Hulse
       html = Nokogiri::HTML(doc.parsed_response)
       table = html.css('table.table_committee')
       return [] if table.css('tr')[1..-1].nil?
-      committee_names = table.css('tr')[2..-1].map{|row| row.css('th').first.text unless row.css('th').empty?}.slice_before(&:itself).flat_map{|a| a.fill(a.first)}
+      most_recent_value = nil
+      committee_names = table.css('tr')[2..-1].map{|row| row.css('th').first.text unless row.css('th').empty?}.map{ |entry| most_recent_value = (entry || most_recent_value) }
       table.css('tr')[2..-1].each_with_index do |row, i|
         next if row.text.strip == ''
         committee = committee_names[i]
