@@ -20,11 +20,11 @@ module Hulse
 
     def test_bill_committees
       assert_equal @other_bill.committees, "House - Ways and Means | Senate - Finance"
-      assert_equal @other_bill.latest_action_date, Date.parse("2015-11-18")
+      assert_equal @other_bill.latest_action_date, Date.parse("2015-12-02")
     end
 
     def test_bill_actions
-      assert_equal @other_bill.actions.size, 478
+      assert_equal @other_bill.actions.size, 481
       assert_equal @bill.actions.size, 24
       assert_equal @third_bill.actions.size, 3
     end
