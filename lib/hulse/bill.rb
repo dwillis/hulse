@@ -86,11 +86,16 @@ module Hulse
 
     def self.get_status_tracker(table)
       tr = table.css('tr').detect{|row| row.children[1].text == 'Tracker:'}
-      tr.children[3].children.first.text.gsub('This bill has the status','').strip
+      tr.children[3].children.first.text.gsub('This bill has the status','').strip if tr
     end
 
     def self.get_party_and_state(html)
       html.text.scan(/\[(.*)\]/).first.first.split('-').first(2)
+    end
+
+    def self.bills_updated_since(date=Date.today)
+
+
     end
 
     def self.scrape_congress(congress)
@@ -113,7 +118,7 @@ module Hulse
       table = html.css('table.standard01')
       cmtes = get_committees(table)
       latest_action = get_latest_action(table)
-      status_tracker = html.css('p.hide_fromsighted').children.first.text.gsub('This bill has the status','').strip
+      status_tracker = begin html.css('p.hide_fromsighted').children.first.text.gsub('This bill has the status','').strip rescue nil end
       party, state = get_party_and_state(table.css('tr').first.children[3].children.first)
       sponsor_url, sponsor_bioguide = get_sponsor(table)
       introduced_date = get_introduced_date(table)
@@ -329,8 +334,10 @@ module Hulse
       subjects = []
       doc = HTTParty.get(subjects_url)
       html = Nokogiri::HTML(doc.parsed_response)
-      instance_variable_set("@policy_area", html.css('ul.plain li').first.text)
-      html.css('ul.plain li')[1..-1].map{|r| r.text.strip}
+      if html.css('ul.plain li').first
+        instance_variable_set("@policy_area", html.css('ul.plain li').first.text)
+        html.css('ul.plain li')[1..-1].map{|r| r.text.strip}
+      end
     end
 
     memoize :cosponsors, :actions, :amendments, :related_bills, :versions, :committee_actions, :subjects, :policy_area
