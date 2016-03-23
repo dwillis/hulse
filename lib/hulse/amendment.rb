@@ -9,6 +9,35 @@ module Hulse
       end
     end
 
+    def self.fetch(congress, page=1)
+      doc = HTTParty.get("https://www.congress.gov/legislation?pageSize=250&q=%7B%22congress%22%3A%22#{congress}%22%2C%22type%22%3A%22amendments%22%7D&page=#{page}")
+      Nokogiri::HTML(doc.parsed_response)
+    end
+
+    def self.scrape_page(html)
+      results = []
+      html.css('ol.results_list h2').each do |amdt|
+        next if bill.children.first.children.text.include?('Amdt')
+        next if bill.next.next.text == 'Reserved for the Speaker.'
+        next if bill.next.next.text == 'Reserved for the Minority Leader.'
+        puts bill.children.first.children.text
+        table = bill.next.next.next.next
+        cmtes = get_committees(table)
+        latest_action = get_latest_action(table)
+        status_tracker = get_status_tracker(table)
+        party, state = get_party_and_state(table)
+        sponsor_url, sponsor_bioguide = get_sponsor(table)
+        introduced_date = get_introduced_date(table)
+        latest_action_text, latest_action_date = get_latest_action(table)
+        results << {url: bill.children.first['href'], number: bill.children.first.children.text, title: bill.next.next.text,
+        sponsor_url: sponsor_url, sponsor_bioguide: sponsor_bioguide, sponsor_party: party, sponsor_state: state.gsub(']',''),
+        introduced_date: introduced_date, bill_type: Hulse::Utils.bill_type(bill.children.first.children.text)['title'],
+        committees: cmtes, latest_action_text: latest_action, latest_action_date: latest_action_date, status: status_tracker,
+        amendments: nil, cosponsors: nil, related_bills: nil}
+      end
+      create_from_results(results)
+    end
+
     def self.create_from_results(results)
       results.map{|r| self.new(r)}
     end
@@ -48,10 +77,10 @@ module Hulse
       amendments = []
       html.css('ol.results_list li').each do |row|
         headers = row.css('tr').map{|r| r.css('th').text}
-        if headers.size == 2
-          td = 0
-        else
+        if headers.size > 1
           td = 1
+        else
+          td = 0
         end
         offered_date = get_offered_date(row, td)
         latest_action_date = get_latest_action_date(row, td)
