@@ -65,11 +65,14 @@ module Hulse
       end
     end
 
-    def self.get_latest_action_date(row, td)
-      begin
-        Date.strptime(row.css('td')[td+1].text.split.first,"%m/%d/%y")
-      rescue
-        row.css('td')[td+1].text.split.first
+    def self.get_latest_action_date_and_text(row, td)
+      if row.css('th').map{|th| th.text}.include?('Latest Action:')
+        index = row.css('th').map{|th| th.text}.index('Latest Action:')
+        lad = Date.strptime(row.css('td')[index].text.split.first,"%m/%d/%y")
+        lat = row.css('td')[index].text.strip.split(' ',2).last
+        [lad, lat]
+      else
+        [nil, nil]
       end
     end
 
@@ -83,10 +86,10 @@ module Hulse
           td = 0
         end
         offered_date = get_offered_date(row, td)
-        latest_action_date = get_latest_action_date(row, td)
+        latest_action_date, latest_action_text = get_latest_action_date_and_text(row, td)
         bioguide, party, state = get_bioguide_party_and_state(row, td)
         amendments << { url: row.css('h2').first.children.first['href'], number: row.css('h2').first.children.first.text, sponsor_url: row.css('td')[td].children.first['href'],
-        sponsor_bioguide: bioguide , sponsor_party: party, sponsor_state: state, sponsor_name: row.css('td')[td].children.first.children.text, offered_date: offered_date, latest_action_text: row.css('td')[td+1].text.strip, latest_action_date: latest_action_date
+        sponsor_bioguide: bioguide , sponsor_party: party, sponsor_state: state, sponsor_name: row.css('td')[td].children.first.children.text, offered_date: offered_date, latest_action_text: latest_action_text, latest_action_date: latest_action_date
         }
       end
       amendments
