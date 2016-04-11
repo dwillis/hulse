@@ -5,7 +5,7 @@ module Hulse
     attr_reader :url, :number, :title, :sponsor_url, :sponsor_bioguide, :sponsor_party, :sponsor_state, :introduced_date, :bill_type, :committees,
     :latest_action_text, :latest_action_date, :status, :actions_url, :chamber, :amendments, :cosponsors, :total_cosponsors, :bipartisan_cosponsors,
     :republican_cospsonsors, :democratic_cosponsors, :independent_cosponsors, :versions, :committee_actions_url, :versions_url, :cosponsors_url,
-    :subjects, :subjects_url, :policy_area, :has_amendments
+    :subjects, :subjects_url, :policy_area, :has_amendments, :amendment_count
 
     def initialize(params={})
       params.each_pair do |k,v|
@@ -123,11 +123,12 @@ module Hulse
       sponsor_url, sponsor_bioguide = get_sponsor(table)
       introduced_date = get_introduced_date(table)
       latest_action_text, latest_action_date = get_latest_action(table)
-      has_amendments = html.css('ul')[7].css("li")[4].text.strip.split('(').last.to_i > 0 ? true : false
+      amendment_count = html.css('ul')[7].css("li")[4].text.strip.split('(').last.to_i
+      has_amendments = amendment_count > 0 ? true : false
       create_from_result({url: url, number: bill_number, title: title, sponsor_url: sponsor_url, sponsor_bioguide: sponsor_bioguide,
       sponsor_party: party, sponsor_state: state.gsub(']',''), introduced_date: introduced_date, bill_type: Hulse::Utils.bill_type(bill_number)['title'],
       committees: cmtes, latest_action_text: latest_action, latest_action_date: latest_action_date, status: status_tracker, subjects: nil,
-      amendments: nil, cosponsors: nil, related_bills: nil, has_amendments: has_amendments})
+      amendments: nil, cosponsors: nil, related_bills: nil, has_amendments: has_amendments, amendment_count: amendment_count})
     end
 
     def self.most_viewed
