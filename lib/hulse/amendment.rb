@@ -1,7 +1,7 @@
 module Hulse
   class Amendment
 
-    attr_reader :url, :number, :sponsor_url, :sponsor_party, :sponsor_state, :sponsor_bioguide, :offered_date, :latest_action_text, :latest_action_date, :chamber, :sponsor_name
+    attr_reader :url, :number, :sponsor_url, :sponsor_party, :sponsor_state, :sponsor_bioguide, :offered_date, :latest_action_text, :latest_action_date, :chamber, :sponsor_name, :purpose
 
     def initialize(params={})
       params.each_pair do |k,v|
@@ -82,14 +82,17 @@ module Hulse
         headers = row.css('tr').map{|r| r.css('th').text}
         if headers.size > 1
           td = 1
+          purpose = row.css('tr').first.css('td').text
         else
           td = 0
+          purpose = nil
         end
         offered_date = get_offered_date(row, td)
         latest_action_date, latest_action_text = get_latest_action_date_and_text(row, td)
         bioguide, party, state = get_bioguide_party_and_state(row, td)
         amendments << { url: row.css('h2').first.children.first['href'], number: row.css('h2').first.children.first.text, sponsor_url: row.css('td')[td].children.first['href'],
-        sponsor_bioguide: bioguide , sponsor_party: party, sponsor_state: state, sponsor_name: row.css('td')[td].children.first.children.text, offered_date: offered_date, latest_action_text: latest_action_text, latest_action_date: latest_action_date
+        sponsor_bioguide: bioguide , sponsor_party: party, sponsor_state: state, sponsor_name: row.css('td')[td].children.first.children.text, offered_date: offered_date, latest_action_text: latest_action_text, latest_action_date: latest_action_date,
+        purpose: purpose
         }
       end
       amendments
