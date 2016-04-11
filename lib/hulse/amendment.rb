@@ -82,7 +82,7 @@ module Hulse
         headers = row.css('tr').map{|r| r.css('th').text}
         if headers.size > 1
           td = 1
-          purpose = row.css('tr').first.css('td').text
+          purpose = row.css('tr').first.css('td').text.strip
         else
           td = 0
           purpose = nil
