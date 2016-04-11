@@ -50,7 +50,7 @@ module Hulse
       begin
         party, state = row.css('td')[td].children.first.children.text.split('[').last.split('-').first(2)
         bioguide = row.css('td')[td].children.first['href'].split('/').last
-        [bioguide, party, state]
+        [bioguide, party, state.gsub(']','')]
       rescue
         # some amendments are sponsored by a committee
         [nil, nil, nil]
