@@ -13,8 +13,12 @@ module Hulse
       sponsorships.map{|r| self.new(r)}
     end
 
-    def self.base_url(congress)
+    def self.house_url(congress)
       "https://www.congress.gov/sponsors-cosponsors/#{congress.to_i.ordinalize.to_s}-congress/representatives/all"
+    end
+
+    def self.senate_url(congress)
+      "https://www.congress.gov/sponsors-cosponsors/#{congress.to_i.ordinalize.to_s}-congress/senators/all"
     end
 
     def self.fetch(url)
@@ -24,8 +28,13 @@ module Hulse
 
     def self.totals(congress)
       results = []
-      html = fetch(base_url(congress))
-      table = (html/:table).first
+      house = fetch(house_url(congress))
+      table = (house/:table).first
+      (table/:tr)[1..-1].each do |row|
+        results << { bioguide_id: (row/:td).first.children.first['href'].split('/').last, member_url: (row/:td).first.children.first['href'], sponsored_bills: (row/:td)[1].text.gsub(' Sponsored','').to_i, cosponsored_bills: (row/:td)[2].text.gsub(' Cosponsored','').to_i}
+      end
+      senate = fetch(senate_url(congress))
+      table = (senate/:table).first
       (table/:tr)[1..-1].each do |row|
         results << { bioguide_id: (row/:td).first.children.first['href'].split('/').last, member_url: (row/:td).first.children.first['href'], sponsored_bills: (row/:td)[1].text.gsub(' Sponsored','').to_i, cosponsored_bills: (row/:td)[2].text.gsub(' Cosponsored','').to_i}
       end
@@ -67,5 +76,6 @@ module Hulse
       end
       create_from_results(sponsorships.flatten)
     end
+
   end
 end
