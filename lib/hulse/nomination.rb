@@ -11,7 +11,20 @@ module Hulse
 
     def self.fetch(congress, page=1)
       doc = HTTParty.get("https://www.congress.gov/nominations?q=%7B%22congress%22%3A%22#{congress}%22%7D&pageSize=250&page=#{page}")
-      Nokogiri::HTML(doc.parsed_response)
+      html = Nokogiri::HTML(doc.parsed_response)
+    end
+
+    def self.scrape_congress(congress)
+      results = []
+      html = fetch(congress)
+      total_noms = html.css('strong').first.next.text.strip.split('of ').last.gsub(',','').to_i
+      pages = (total_noms.to_f/250.0).ceil
+      results << scrape_page(html)
+      (2..pages).each do |page|
+        html = fetch(congress, page)
+        results << scrape_page(html)
+      end
+      results.flatten
     end
 
     def self.create_from_results(results)
@@ -25,7 +38,6 @@ module Hulse
     def self.scrape_page(html)
       results = []
       html.css('ol.results_list h2').each do |nom|
-        puts nom.children.first.children.text
         table = nom.next.next
         raw_title = nom.children[2].text.strip.split(')').last.encode(Encoding.find('ASCII'), :invalid => :replace, :undef => :replace, :replace => '').strip.split('  ')
         if raw_title.size > 1
