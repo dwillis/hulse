@@ -79,6 +79,7 @@ module Hulse
 
     def self.get_latest_action(table)
       return [nil, nil] if table.css('tr').detect{|row| row.children[1].text == 'Latest Action:'}.children[3].children.first.text == 'Action data to be retrieved.'
+      return [nil, nil] if table.css('tr').detect{|row| row.children[1].text == 'Latest Action:'}.children[3].children.first.text == 'There is no latest action for this bill'
       text = table.css('tr').detect{|row| row.children[1].text == 'Latest Action:'}.children[3].children.first.text.split("(").first.strip
       date = Date.strptime(table.css('tr').detect{|row| row.children[1].text == 'Latest Action:'}.children[3].children.first.text.split.first, '%m/%d/%Y')
       [text, date]
@@ -91,11 +92,6 @@ module Hulse
 
     def self.get_party_and_state(html)
       html.text.scan(/\[(.*)\]/).first.first.split('-').first(2)
-    end
-
-    def self.bills_updated_since(date=Date.today)
-
-
     end
 
     def self.scrape_congress(congress)
