@@ -97,9 +97,9 @@ module Hulse
       date_received = Date.strptime(dr.next.next.text.strip, '%m/%d/%Y') if dr
       la = html.css('h2').detect{|h| h.text == 'Latest Action'}
       latest_action_text = la.next.next.text.strip if la
-      if latest_action_text.include?("Confirmed")
+      if latest_action_text and latest_action_text.include?("Confirmed")
         status = 'Confirmed'
-      elsif latest_action_text.include?("withdrawal of nomination")
+      elsif latest_action_text and latest_action_text.include?("withdrawal of nomination")
         status = "Withdrawn"
       else
         status = 'Pending'
