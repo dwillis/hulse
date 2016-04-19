@@ -57,7 +57,8 @@ module Hulse
           status = 'Pending'
         end
         results << {
-          url: nom.children[1]['href'], number: nom.children[1].children.first.text,
+          url: nom.children[1]['href'],
+          id: nom.children[1].children.first.text,
           name: name,
           agency: agency,
           description: table.css('tr').detect{|row| row.children[1].text == 'Description:'}.children[3].text.strip,
