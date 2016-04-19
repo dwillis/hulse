@@ -1,7 +1,7 @@
 module Hulse
   class Nomination
 
-    attr_reader :id, :date, :committee, :url, :text
+    attr_reader :id, :date, :committee, :url, :text, :actions, :agency, :description, :date_received, :latest_action_text, :latest_action_date
 
     def initialize(params={})
       params.each_pair do |k,v|
@@ -59,6 +59,26 @@ module Hulse
         }
       end
       create_from_results(results)
+    end
+
+    def self.scrape_nomination(url)
+      actions = []
+      doc = HTTParty.get(url)
+      html = Nokogiri::HTML(doc.parsed_response)
+      nom_number, name, agency = html.css('h1').first.children.first.text.split(html.css('h1').first.children.first.text.mb_chars[4..6].wrapped_string)
+      c = html.css('h2').detect{|h| h.text == 'Committee'}
+      committee = c.next.next.text.strip if c
+      d = html.css('h2').detect{|h| h.text == 'Description'}
+      description = d.next.next.text.strip if d
+      dr = html.css('h2').detect{|h| h.text == 'Date Received from President'}
+      date_received = Date.strptime(dr.next.next.text.strip, '%m/%d/%Y') if dr
+      la = html.css('h2').detect{|h| h.text == 'Latest Action'}
+      latest_action = la.next.next.text.strip if la
+      table = html.css('table.item_table')
+      table.css('tr')[1..-1].each do |row|
+        actions << {date: Date.strptime(row.css('td').first.text, "%m/%d/%Y"), action: row.css('td').last.children.first.text.strip}
+      end
+      result = {id: nom_number, name: name, agency: agency, description: description, committee: committee, date_received: date_received, latest_action_text: latest_action, actions: actions}
     end
 
   end
