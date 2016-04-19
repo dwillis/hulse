@@ -78,10 +78,21 @@ module Hulse
       html = Nokogiri::HTML(doc.parsed_response)
       splitter = html.css('h1').first.children.first.text.unicode_normalize.split[1]
       nom_number, name, agency = html.css('h1').first.children.first.text.unicode_normalize.split(splitter)
+      name = name.strip if name
+      if agency
+        agency = agency.strip
+      else
+        agency = name.strip
+        name = nil
+      end
       c = html.css('h2').detect{|h| h.text == 'Committee'}
       committee = c.next.next.text.strip if c
-      d = html.css('h2').detect{|h| h.text == 'Description'}
-      description = d.next.next.text.strip if d
+      if html.css('h2').detect{|h| h.text == 'Description'}
+        d = html.css('h2').detect{|h| h.text == 'Description'}
+        description = d.next.next.text.strip if d
+      elsif html.css('h2').detect{|h| h.text == 'Nominees'}
+        description = html.css('h2').detect{|h| h.text == 'Nominees'}.next.next.text.strip
+      end
       dr = html.css('h2').detect{|h| h.text == 'Date Received from President'}
       date_received = Date.strptime(dr.next.next.text.strip, '%m/%d/%Y') if dr
       la = html.css('h2').detect{|h| h.text == 'Latest Action'}
@@ -98,7 +109,7 @@ module Hulse
       table.css('tr')[1..-1].each do |row|
         actions << {date: Date.strptime(row.css('td').first.text, "%m/%d/%Y"), action: row.css('td').last.children.first.text.strip}
       end
-      result = {id: nom_number.strip, name: name.strip, agency: agency.strip, description: description, committee: committee, date_received: date_received, latest_action_text: latest_action_text, status: status, actions: actions}
+      result = {id: nom_number.strip, name: name, agency: agency, description: description, committee: committee, date_received: date_received, latest_action_text: latest_action_text, status: status, actions: actions}
       create_from_result(result)
     end
   end
