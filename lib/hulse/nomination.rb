@@ -1,7 +1,8 @@
+# encoding: utf-8
 module Hulse
   class Nomination
 
-    attr_reader :id, :date, :committee, :url, :text, :actions, :agency, :description, :date_received, :latest_action_text, :latest_action_date
+    attr_reader :id, :date, :committee, :url, :text, :actions, :agency, :description, :date_received, :latest_action_text, :latest_action_date, :status
 
     def initialize(params={})
       params.each_pair do |k,v|
@@ -47,6 +48,14 @@ module Hulse
           name = nil
           agency = raw_title.first
         end
+        latest_action_text = table.css('tr').detect{|row| row.children[1].text == 'Latest Action:'}.children[3].children.first.text.split("(").first.strip.split('-').last.strip
+        if latest_action_text.include?("Confirmed")
+          status = 'Confirmed'
+        elsif latest_action_text.include?("withdrawal of nomination")
+          status = "Withdrawn"
+        else
+          status = 'Pending'
+        end
         results << {
           url: nom.children[1]['href'], number: nom.children[1].children.first.text,
           name: name,
@@ -54,8 +63,9 @@ module Hulse
           description: table.css('tr').detect{|row| row.children[1].text == 'Description:'}.children[3].text.strip,
           date_received: Date.strptime(table.css('tr').detect{|row| row.children[1].text == 'Date Received from President:'}.children[3].text.strip, '%m/%d/%Y'),
           committee: table.css('tr').detect{|row| row.children[1].text == 'Committee:'}.children[3].text.strip,
-          latest_action_text: table.css('tr').detect{|row| row.children[1].text == 'Latest Action:'}.children[3].children.first.text.split("(").first.strip.split('-').last.strip,
-          latest_action_date: Date.strptime(table.css('tr').detect{|row| row.children[1].text == 'Latest Action:'}.children[3].children.first.text.split("(").first.strip.split('-').first.strip, '%m/%d/%Y')
+          latest_action_text: latest_action_text,
+          latest_action_date: Date.strptime(table.css('tr').detect{|row| row.children[1].text == 'Latest Action:'}.children[3].children.first.text.split("(").first.strip.split('-').first.strip, '%m/%d/%Y'),
+          status: status
         }
       end
       create_from_results(results)
@@ -65,7 +75,8 @@ module Hulse
       actions = []
       doc = HTTParty.get(url)
       html = Nokogiri::HTML(doc.parsed_response)
-      nom_number, name, agency = html.css('h1').first.children.first.text.split(html.css('h1').first.children.first.text.mb_chars[4..6].wrapped_string)
+      splitter = html.css('h1').first.children.first.text.unicode_normalize.split[1]
+      nom_number, name, agency = html.css('h1').first.children.first.text.unicode_normalize.split(splitter)
       c = html.css('h2').detect{|h| h.text == 'Committee'}
       committee = c.next.next.text.strip if c
       d = html.css('h2').detect{|h| h.text == 'Description'}
@@ -73,13 +84,21 @@ module Hulse
       dr = html.css('h2').detect{|h| h.text == 'Date Received from President'}
       date_received = Date.strptime(dr.next.next.text.strip, '%m/%d/%Y') if dr
       la = html.css('h2').detect{|h| h.text == 'Latest Action'}
-      latest_action = la.next.next.text.strip if la
+      latest_action_text = la.next.next.text.strip if la
+      if latest_action_text.include?("Confirmed")
+        status = 'Confirmed'
+      elsif latest_action_text.include?("withdrawal of nomination")
+        status = "Withdrawn"
+      else
+        status = 'Pending'
+      end
+
       table = html.css('table.item_table')
       table.css('tr')[1..-1].each do |row|
         actions << {date: Date.strptime(row.css('td').first.text, "%m/%d/%Y"), action: row.css('td').last.children.first.text.strip}
       end
-      result = {id: nom_number, name: name, agency: agency, description: description, committee: committee, date_received: date_received, latest_action_text: latest_action, actions: actions}
+      result = {id: nom_number.strip, name: name.strip, agency: agency.strip, description: description, committee: committee, date_received: date_received, latest_action_text: latest_action_text, status: status, actions: actions}
+      create_from_result(result)
     end
-
   end
 end
