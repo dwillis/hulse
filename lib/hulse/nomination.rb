@@ -2,7 +2,7 @@
 module Hulse
   class Nomination
 
-    attr_reader :id, :date, :committee, :url, :text, :actions, :agency, :description, :date_received, :latest_action_text, :latest_action_date, :status
+    attr_reader :id, :name, :date, :committee, :url, :text, :actions, :agency, :description, :date_received, :latest_action_text, :latest_action_date, :status
 
     def initialize(params={})
       params.each_pair do |k,v|
