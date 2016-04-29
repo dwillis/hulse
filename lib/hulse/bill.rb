@@ -136,7 +136,7 @@ module Hulse
       current_week = html.css("table").first.css('tr')
       current_week.each do |row|
         rank = row.css('td').first.text.scan(/\d+/).first.to_i
-        bill, congress = row.css('td')[1].text.split
+        bill, congress = row.css('td')[1].text.gsub(/[[:space:]]/, ' ').split
         congress = congress.scan(/\d+/).first.to_i
         title = row.css('td')[2].text.strip
         most_viewed << [ current_week_date, rank, bill, congress, title]
