@@ -2,7 +2,7 @@
 module Hulse
   class Nomination
 
-    attr_reader :id, :name, :date, :committee, :url, :text, :actions, :agency, :description, :date_received, :latest_action_text, :latest_action_date, :status
+    attr_reader :id, :name, :date, :committee, :committee_code, :url, :text, :actions, :agency, :description, :date_received, :latest_action_text, :latest_action_date, :status, :privileged, :civilian
 
     def initialize(params={})
       params.each_pair do |k,v|
@@ -10,9 +10,73 @@ module Hulse
       end
     end
 
-    def self.fetch(congress, page=1)
-      doc = HTTParty.get("https://www.congress.gov/nominations?q=%7B%22congress%22%3A%22#{congress}%22%7D&pageSize=250&page=#{page}")
-      html = Nokogiri::HTML(doc.parsed_response)
+    def self.civilian_types
+      ['NomPrivileged.xml', 'NomCivilianPendingCommittee.xml', 'NomCivilianConfirmed.xml', 'NomCivilianPendingCalendar.xml', 'NomWithdrawn.xml', 'NomFailedOrReturned.xml']
+    end
+
+    def self.noncivilian_types
+      ['NomNonCivilianPendingCommittee', 'NomNonCivilianConfirmed.xml', 'NomNonCivilianPendingCalendar.xml']
+    end
+
+    def self.fetch_and_parse_civilians
+      results = []
+      base_url = "http://www.senate.gov/legislative/LIS/nominations/"
+      civilian_types.each do |nom_type|
+        civilian = true
+        status, privileged = check_type_for_status(nom_type)
+        response = HTTParty.get(base_url+nom_type)
+        results << parse_xml(response.parsed_response)
+      end
+      results
+    end
+
+    def self.fetch_and_parse_noncivilian
+      results = []
+      base_url = "http://www.senate.gov/legislative/LIS/nominations/"
+      noncivilian_types.each do |nom_type|
+        civilian = false
+        status, privileged = check_type_for_status(nom_type)
+        response = HTTParty.get(base_url+nom_type)
+        results << parse_xml(response.parsed_response)
+      end
+      results
+    end
+
+    def self.check_type_for_status(nom_type)
+      privileged = false
+      if nom_type.include?('Confirmed')
+        status = 'confirmed'
+      elsif nom_type.include?('Privileged')
+        privileged = true
+        status = 'Pending Floor Vote'
+      elsif nom_type.include?('PendingCommittee')
+        status = 'Pending Committee'
+      elsif nom_type.include?('PendingCalendar')
+        status = 'Pending Floor Vote'
+      end
+      [status, privileged]
+    end
+
+    def self.parse_xml(parsed_response)
+      results = []
+      parsed_response['Nominations']['Nomination'].each do |nom|
+        results << {
+          url: nil,
+          id: nom['NominationDisplayNumber']['__content__'],
+          civilian: nom['Civilian'],
+          privileged: nom['Privileged'],
+          name: nil,
+          agency: nom['Organization'],
+          description: nom['ReportingDescription'],
+          date_received: nom['ReceivedDate'],
+          committee: nom['Committees']['CommitteeReferrals']['Committee']['CommitteeFullName'],
+          committee_code: nom['Committees']['CommitteeReferrals']['Committee']['SenateCommitteeCode'],
+          latest_action_text: nil,
+          latest_action_date: nil,
+          status: nil
+        }
+      end
+
     end
 
     def self.scrape_congress(congress)
