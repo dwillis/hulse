@@ -171,7 +171,7 @@ module Hulse
       most_viewed = []
       url = "https://www.congress.gov/rss/most-viewed-bills.xml"
       doc = HTTParty.get(url)
-      doc.parsed_response['rss']['channel']['item'][1..-1].each_with_index do |item|
+      doc.parsed_response['rss']['channel']['item'][1..-1].each_with_index do |item, index|
         most_viewed << [Date.parse(doc.parsed_response['rss']['channel']['pubDate']), index+1, item['guid']['__content__'], Congress.current, item['description']]
       end
       most_viewed
