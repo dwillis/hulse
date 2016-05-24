@@ -18,6 +18,11 @@ module Hulse
       Nokogiri::HTML(doc.parsed_response)
     end
 
+    def self.search(congress, term, page=1)
+      doc = HTTParty.get("https://www.congress.gov/search?q=%7B%22congress%22%3A%22#{congress}%22%2C%22source%22%3A%22legislation%22%2C%22search%22%3A%22#{term}%22%7D&pageSize=250")
+      Nokogiri::HTML(doc.parsed_response)
+    end
+
     def self.create_from_results(results)
       bills = []
       bills << results.map{|r| self.new(r)}
@@ -94,6 +99,24 @@ module Hulse
       html.text.scan(/\[(.*)\]/).first.first.split('-').first(2)
     end
 
+    def self.scrape_search(congress, term)
+      results = []
+      html = search(congress, term)
+      total_bills = html.css('strong').first.next.text.strip.split('of ').last.gsub(',','').to_i
+      pages = (total_bills.to_f/250.0).round
+      results << scrape_page(html)
+      (2..pages).each do |page|
+        html = fetch(congress, page)
+        results << scrape_page(html)
+      end
+      results.flatten
+    end
+
+    def self.search_bill_numbers(congress, term)
+      results = scrape_search(congress, term)
+      results.map{|b| b.number}
+    end
+
     def self.scrape_congress(congress)
       results = []
       html = fetch(congress)
@@ -140,6 +163,16 @@ module Hulse
         congress = congress.scan(/\d+/).first.to_i
         title = row.css('td')[2].text.strip
         most_viewed << [ current_week_date, rank, bill, congress, title]
+      end
+      most_viewed
+    end
+
+    def self.most_viewed_rss
+      most_viewed = []
+      url = "https://www.congress.gov/rss/most-viewed-bills.xml"
+      doc = HTTParty.get(url)
+      doc.parsed_response['rss']['channel']['item'][1..-1].each_with_index do |item|
+        most_viewed << [Date.parse(doc.parsed_response['rss']['channel']['pubDate']), index+1, item['guid']['__content__'], Congress.current, item['description']]
       end
       most_viewed
     end
