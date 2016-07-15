@@ -15,8 +15,7 @@ module Hulse
     def self.current
       url = "http://clerk.house.gov/xml/lists/MemberData.xml"
       response = HTTParty.get(url)
-      congressdotgov_results = congressdotgov(Hulse::Utils.current_congress)
-      self.create_from_xml(response, congressdotgov_results)
+      self.create_from_xml(response)
     end
 
     def self.congressdotgov(congress)
@@ -26,12 +25,12 @@ module Hulse
       html = Nokogiri::HTML(response.parsed_response)
       table = (html/:table).first
       (table/:tr)[1..-1].each do |row|
-        results << { bioguide_id: (row/:td).first.children.first['href'].split('/').last, member_url: (row/:td).first.children.first['href'], sponsored_bills: (row/:td)[1].text.gsub(' Sponsored','').to_i, cosponsored_bills: (row/:td)[2].text.gsub(' Cosponsored','').to_i}
+        results << { bioguide_id: row.children[1].children[0]['href'].split('/').last, member_url: (row/:td).first.children.first['href'], sponsored_bills: (row/:td)[1].text.gsub(' Sponsored','').to_i, cosponsored_bills: (row/:td)[2].text.gsub(' Cosponsored','').to_i}
       end
       results
     end
 
-    def self.create_from_xml(response, congressdotgov_results)
+    def self.create_from_xml(response)
       members = []
       response['MemberData']['members']['member'].each do |member|
         if member['member_info']['elected_date']['date'] == ''
@@ -39,11 +38,9 @@ module Hulse
           predecessor = member['predecessor_info']
           vacancy_date = Date.parse(member['predecessor_info']['pred_vacate_date']['date'])
           vacant = true
-          dotgov = {bioguide_id: nil, member_url: nil, sponsored_bills: nil, cosponsored_bills: nil}
         else
           footnote, predecessor, vacancy_date = nil
           vacant = false
-          dotgov = congressdotgov_results.detect{|c| c[:bioguide_id] == member['member_info']['bioguideID']}
         end
 
         members << self.new(bioguide_id: member['member_info']['bioguideID'],
@@ -73,10 +70,7 @@ module Hulse
           is_vacant: vacant,
           footnote: footnote,
           predecessor: predecessor,
-          vacancy_date: vacancy_date,
-          sponsored_bills: dotgov[:sponsored_bills],
-          cosponsored_bills: dotgov[:cosponsored_bills],
-          congressdotgov_url: dotgov[:member_url]
+          vacancy_date: vacancy_date
         )
       end
       members
