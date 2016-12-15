@@ -76,7 +76,12 @@ module Hulse
           status: nil
         }
       end
+      results
+    end
 
+    def self.fetch(congress, page=1)
+      doc = HTTParty.get("https://www.congress.gov/search?q={%22source%22:%22nominations%22,%22congress%22:%22#{congress}%22}&pageSize=250&page=#{page}")
+      html = Nokogiri::HTML(doc.parsed_response)
     end
 
     def self.scrape_congress(congress)
@@ -102,9 +107,9 @@ module Hulse
 
     def self.scrape_page(html)
       results = []
-      html.css('ol.results_list h2').each do |nom|
-        table = nom.next.next
-        raw_title = nom.children[2].text.strip.split(')').last.encode(Encoding.find('ASCII'), :invalid => :replace, :undef => :replace, :replace => '').strip.split('  ')
+      html.css('ol.basic-search-results-lists li.expanded').each do |nom|
+        puts nom.css('span.result-heading').first.children[1].text
+        raw_title = nom.css('span.result-heading').first.children[3].text.encode(Encoding.find('ASCII'), :invalid => :replace, :undef => :replace, :replace => '').strip.split('  ')
         if raw_title.size > 1
           name = raw_title.first
           agency = raw_title.last
@@ -112,7 +117,7 @@ module Hulse
           name = nil
           agency = raw_title.first
         end
-        latest_action_text = table.css('tr').detect{|row| row.children[1].text == 'Latest Action:'}.children[3].children.first.text.split("(").first.strip.split('-').last.strip
+        latest_action_text = nom.css('span.result-item').detect{|row| row.text.strip.include?('Latest Action:')}.children[2].text.strip.split(' (').first
         if latest_action_text.include?("Confirmed")
           status = 'Confirmed'
         elsif latest_action_text.include?("withdrawal of nomination")
@@ -121,15 +126,15 @@ module Hulse
           status = 'Pending'
         end
         results << {
-          url: nom.children[1]['href'],
-          id: nom.children[1].children.first.text,
+          url: nom.css('span.result-heading').first.children[1]['href'],
+          id: nom.css('span.result-heading').first.children[1].text,
           name: name,
           agency: agency,
-          description: table.css('tr').detect{|row| row.children[1].text == 'Description:'}.children[3].text.strip,
-          date_received: Date.strptime(table.css('tr').detect{|row| row.children[1].text == 'Date Received from President:'}.children[3].text.strip, '%m/%d/%Y'),
-          committee: table.css('tr').detect{|row| row.children[1].text == 'Committee:'}.children[3].text.strip,
+          description: nom.css('span.result-item').first.text.strip,
+          date_received: Date.strptime(nom.css('span.result-item').detect{|row| row.text.strip.include?('Date Received from President:')}.children[2].text.strip, '%m/%d/%Y'),
+          committee: nom.css('span.result-item').detect{|row| row.text.strip.include?('Committee:')}.children[2].text.strip,
           latest_action_text: latest_action_text,
-          latest_action_date: Date.strptime(table.css('tr').detect{|row| row.children[1].text == 'Latest Action:'}.children[3].children.first.text.split("(").first.strip.split('-').first.strip, '%m/%d/%Y'),
+          latest_action_date: Date.strptime(nom.css('span.result-item').detect{|row| row.text.strip.include?('Latest Action:')}.children[2].text.strip.split(' (').first, '%m/%d/%Y'),
           status: status
         }
       end
