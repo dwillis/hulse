@@ -40,8 +40,9 @@ module Hulse
       members = []
       response['contact_information']['member'].each do |member|
         dotgov = congressdotgov_results.detect{|c| c[:bioguide_id] == member['bioguide_id']}
+        dotgov = {sponsored_bills: 0, cosponsored_bills: 0, member_url: nil} if not dotgov
         cmtes = committee_assignment_results.detect{|c| c['bioguideId'] == member['bioguide_id']}
-        members << self.new(bioguide_id: member['bioguide_id'],
+        members << Hulse::SenateMember.new(bioguide_id: member['bioguide_id'],
           lis_member_id: cmtes['lis_member_id'],
           title: member['member_full'],
           last_name: member['last_name'],
