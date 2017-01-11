@@ -30,8 +30,8 @@ module Hulse
       response = HTTParty.get(url)
       html = Nokogiri::HTML(response.parsed_response)
       table = (html/:table).first
-      (table/:tr)[1..-1].each do |row|
-        results << { bioguide_id: (row/:td).first.children.first['href'].split('/').last, member_url: (row/:td).first.children.first['href'], sponsored_bills: (row/:td)[1].text.gsub(' Sponsored','').to_i, cosponsored_bills: (row/:td)[2].text.gsub(' Cosponsored','').to_i}
+      (table/:tr)[2..-1].each do |row|
+        results << { bioguide_id: (row/:td).first.children.first['href'].split('/').last, member_url: (row/:td).first.children.first['href'], sponsored_bills: (row/:td)[1].text.to_i, sponsored_amendments: (row/:td)[2].text.to_i, cosponsored_bills: (row/:td)[3].text.to_i, cosponsored_bills_withdrawn: (row/:td)[5].text.to_i, cosponsored_amendments: (row/:td)[6].text.to_i, cosponsored_amendments_withdrawn: (row/:td)[8].text.to_i}
       end
       results
     end
