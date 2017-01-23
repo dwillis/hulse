@@ -125,6 +125,11 @@ module Hulse
         else
           status = 'Pending'
         end
+        if nom.css('span.result-item').detect{|row| row.text.strip.include?('Committee:')}
+          cmte = nom.css('span.result-item').detect{|row| row.text.strip.include?('Committee:')}.children[2].text.strip
+        else
+          cmte = nil
+        end
         results << {
           url: nom.css('span.result-heading').first.children[1]['href'],
           id: nom.css('span.result-heading').first.children[1].text,
@@ -132,7 +137,7 @@ module Hulse
           agency: agency,
           description: nom.css('span.result-item').first.text.strip,
           date_received: Date.strptime(nom.css('span.result-item').detect{|row| row.text.strip.include?('Date Received from President:')}.children[2].text.strip, '%m/%d/%Y'),
-          committee: nom.css('span.result-item').detect{|row| row.text.strip.include?('Committee:')}.children[2].text.strip,
+          committee: cmte,
           latest_action_text: latest_action_text,
           latest_action_date: Date.strptime(nom.css('span.result-item').detect{|row| row.text.strip.include?('Latest Action:')}.children[2].text.strip.split(' (').first, '%m/%d/%Y'),
           status: status
