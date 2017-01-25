@@ -43,10 +43,10 @@ module Hulse
         vote_title: response['vote_title'],
         majority_requirement: response['majority_requirement'],
         vote_result: response['vote_result'],
-        document: response['document'].inject({}){|memo,(k,v)| memo[k.to_sym] = v; memo},
-        amendment: response['amendment'].inject({}){|memo,(k,v)| memo[k.to_sym] = v; memo},
-        vote_count: response['count'].inject({}){|memo,(k,v)| memo[k.to_sym] = v; memo},
-        tie_breaker: response['tie_breaker'].inject({}){|memo,(k,v)| memo[k.to_sym] = v; memo},
+        document: response['document'].inject({}){|memo,(k,v)| memo[k] = v; memo},
+        amendment: response['amendment'].inject({}){|memo,(k,v)| memo[k] = v; memo},
+        vote_count: response['count'].inject({}){|memo,(k,v)| memo[k] = v; memo},
+        tie_breaker: response['tie_breaker'].inject({}){|memo,(k,v)| memo[k] = v; memo},
         members: members
       )
     end
