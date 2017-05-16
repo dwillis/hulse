@@ -23,7 +23,7 @@ module Hulse
 
 
     def self.current_congress
-      114
+      115
     end
 
     # this function is more intuitive when you solve for the other side:
