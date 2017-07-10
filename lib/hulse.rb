@@ -3,6 +3,7 @@ require 'oj'
 require 'nokogiri'
 require 'htmlentities'
 require 'memoist'
+require 'rest-client'
 require "hulse/version"
 require "hulse/bill"
 require "hulse/record"

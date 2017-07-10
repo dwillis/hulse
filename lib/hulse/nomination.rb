@@ -24,8 +24,8 @@ module Hulse
       civilian_types.each do |nom_type|
         civilian = true
         status, privileged = check_type_for_status(nom_type)
-        response = HTTParty.get(base_url+nom_type)
-        results << parse_xml(response.parsed_response)
+        response = RestClient.get(base_url+nom_type)
+        results << parse_xml(response.body)
       end
       results
     end
@@ -36,8 +36,8 @@ module Hulse
       noncivilian_types.each do |nom_type|
         civilian = false
         status, privileged = check_type_for_status(nom_type)
-        response = HTTParty.get(base_url+nom_type)
-        results << parse_xml(response.parsed_response)
+        response = RestClient.get(base_url+nom_type)
+        results << parse_xml(response.body)
       end
       results
     end
@@ -80,8 +80,8 @@ module Hulse
     end
 
     def self.fetch(congress, page=1)
-      doc = HTTParty.get("https://www.congress.gov/search?q={%22source%22:%22nominations%22,%22congress%22:%22#{congress}%22}&pageSize=250&page=#{page}")
-      html = Nokogiri::HTML(doc.parsed_response)
+      doc = RestClient.get("https://www.congress.gov/search?q={%22source%22:%22nominations%22,%22congress%22:%22#{congress}%22}&pageSize=250&page=#{page}")
+      html = Nokogiri::HTML(doc.body)
     end
 
     def self.scrape_congress(congress)
@@ -148,8 +148,8 @@ module Hulse
 
     def self.scrape_nomination(url)
       actions = []
-      doc = HTTParty.get(url)
-      html = Nokogiri::HTML(doc.parsed_response)
+      doc = RestClient.get(url)
+      html = Nokogiri::HTML(doc.body)
       splitter = html.css('h1').first.children.first.text.unicode_normalize.split[1]
       nom_number, name, agency = html.css('h1').first.children.first.text.unicode_normalize.split(splitter)
       name = name.strip if name
@@ -180,7 +180,8 @@ module Hulse
       end
 
       table = html.css('table.item_table')
-      table.css('tr')[1..-1].each do |row|
+      table.css('tbody tr').each do |row|
+        puts row
         actions << {date: Date.strptime(row.css('td').first.text, "%m/%d/%Y"), action: row.css('td').last.children.first.text.strip}
       end
       result = {id: nom_number.strip, name: name, agency: agency, description: description, committee: committee, date_received: date_received, latest_action_text: latest_action_text, status: status, actions: actions}
