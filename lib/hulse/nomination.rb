@@ -2,7 +2,7 @@
 module Hulse
   class Nomination
 
-    attr_reader :id, :name, :date, :committee, :committee_code, :url, :text, :actions, :agency, :description, :date_received, :latest_action_text, :latest_action_date, :status, :privileged, :civilian
+    attr_reader :id, :name, :date, :committee, :committee_code, :url, :text, :actions, :agency, :description, :date_received, :latest_action_text, :latest_action_date, :status, :privileged, :civilian, :partitioned
 
     def initialize(params={})
       params.each_pair do |k,v|
@@ -159,6 +159,11 @@ module Hulse
         agency = name.strip
         name = nil
       end
+      if html.text.include?('was partitioned')
+        partitioned = true
+      else
+        partitioned = false
+      end
       c = html.css('h2').detect{|h| h.text == 'Committee'}
       committee = c.next.next.text.strip if c
       if html.css('h2').detect{|h| h.text == 'Description'}
@@ -181,10 +186,9 @@ module Hulse
 
       table = html.css('table.item_table')
       table.css('tbody tr').each do |row|
-        puts row
         actions << {date: Date.strptime(row.css('td').first.text, "%m/%d/%Y"), action: row.css('td').last.children.first.text.strip}
       end
-      result = {id: nom_number.strip, name: name, agency: agency, description: description, committee: committee, date_received: date_received, latest_action_text: latest_action_text, status: status, actions: actions}
+      result = {id: nom_number.strip, name: name, agency: agency, description: description, committee: committee, date_received: date_received, latest_action_text: latest_action_text, status: status, actions: actions, partitioned: partitioned}
       create_from_result(result)
     end
   end
