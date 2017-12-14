@@ -14,6 +14,11 @@ module Hulse
       end
     end
 
+    def self.create(url)
+      html = fetch(url)
+      scrape_page(html)
+    end
+
     def self.scrape_page(html)
       self.new(
         congress: html.css("#report ul li a").first['href'].split('/')[1],
