@@ -14,13 +14,13 @@ module Hulse
     end
 
     def self.fetch(congress, page=1)
-      doc = HTTParty.get("https://www.congress.gov/legislation?q=%7B%22congress%22%3A%22#{congress}%22%7D&pageSize=250&page=#{page}&%2C%22type%22%3A%5B%22bills%22%2C%22resolutions%22%2C%22joint-resolutions%22%2C%22concurrent-resolutions%22%5D%7D")
-      Nokogiri::HTML(doc.parsed_response)
+      doc = RestClient.get("https://www.congress.gov/legislation?q=%7B%22congress%22%3A%22#{congress}%22%7D&pageSize=250&page=#{page}&%2C%22type%22%3A%5B%22bills%22%2C%22resolutions%22%2C%22joint-resolutions%22%2C%22concurrent-resolutions%22%5D%7D")
+      Nokogiri::HTML(doc.body)
     end
 
     def self.search(congress, term, page=1)
-      doc = HTTParty.get("https://www.congress.gov/search?q=%7B%22congress%22%3A%22#{congress}%22%2C%22source%22%3A%22legislation%22%2C%22search%22%3A%22#{term}%22%7D&pageSize=250")
-      Nokogiri::HTML(doc.parsed_response)
+      doc = RestClient.get("https://www.congress.gov/search?q=%7B%22congress%22%3A%22#{congress}%22%2C%22source%22%3A%22legislation%22%2C%22search%22%3A%22#{term}%22%7D&pageSize=250")
+      Nokogiri::HTML(doc.body)
     end
 
     def self.create_from_results(results)
@@ -131,8 +131,8 @@ module Hulse
     end
 
     def self.scrape_bill(url)
-      doc = HTTParty.get(url)
-      html = Nokogiri::HTML(doc.parsed_response)
+      doc = RestClient.get(url)
+      html = Nokogiri::HTML(doc.body)
       bill_number, title = html.css('h1').first.children.first.text.split(' - ')
       table = html.css('table.standard01')
       cmtes = get_committees(table)
@@ -153,8 +153,8 @@ module Hulse
     def self.most_viewed
       most_viewed = []
       url = "https://www.congress.gov/resources/display/content/Most-Viewed+Bills"
-      doc = HTTParty.get(url)
-      html = Nokogiri::HTML(doc.parsed_response)
+      doc = RestClient.get(url)
+      html = Nokogiri::HTML(doc.body)
       current_week_date = Date.parse(html.css('h2').text)
       current_week = html.css("table").first.css('tr')
       current_week.each do |row|
@@ -191,8 +191,8 @@ module Hulse
 
     def get_actions
       actions = []
-      doc = HTTParty.get(actions_url)
-      html = Nokogiri::HTML(doc.parsed_response)
+      doc = RestClient.get(actions_url)
+      html = Nokogiri::HTML(doc.body)
       table = html.css("table.item_table")
       ch = true if table.css('tr')[0].children[3].text == 'Chamber'
       table.css('tr')[1..-1].each do |row|
@@ -227,8 +227,8 @@ module Hulse
 
     def get_related_bills
       related_bills = []
-      doc = HTTParty.get(related_bills_url)
-      html = Nokogiri::HTML(doc.parsed_response)
+      doc = RestClient.get(related_bills_url)
+      html = Nokogiri::HTML(doc.body)
       table = html.css("table.item_table.relatedBills")
       return [] if table.css('tr')[1..-1].nil?
       table.css('tr')[1..-1].each do |row|
@@ -262,8 +262,8 @@ module Hulse
 
     def get_cosponsors
       cosponsors = []
-      doc = HTTParty.get(cosponsors_url)
-      html = Nokogiri::HTML(doc.parsed_response)
+      doc = RestClient.get(cosponsors_url)
+      html = Nokogiri::HTML(doc.body)
       table = html.css("table.item_table")
       return [] if table.css('tr')[1..-1].nil?
       table.css('tr')[1..-1].each do |row|
@@ -307,8 +307,8 @@ module Hulse
 
     def get_versions
       versions = []
-      doc = HTTParty.get(versions_url)
-      html = Nokogiri::HTML(doc.parsed_response)
+      doc = RestClient.get(versions_url)
+      html = Nokogiri::HTML(doc.body)
       number = html.css("label.tntFormLabel").text.strip.scan(/\d+/).first.to_i
       html.css("select").last.children.select{|c| !c['value'].nil?}.each do |version|
         versions << {url: versions_url+"/#{version['value']}", version: version.text.strip, stage: version['value'].upcase}
@@ -326,8 +326,8 @@ module Hulse
 
     def get_committee_actions
       committee_actions = []
-      doc = HTTParty.get(committee_actions_url)
-      html = Nokogiri::HTML(doc.parsed_response)
+      doc = RestClient.get(committee_actions_url)
+      html = Nokogiri::HTML(doc.body)
       table = html.css('table.table_committee')
       return [] if table.css('tr')[1..-1].nil?
       most_recent_value = nil
@@ -363,8 +363,8 @@ module Hulse
 
     def get_subjects
       subjects = []
-      doc = HTTParty.get(subjects_url)
-      html = Nokogiri::HTML(doc.parsed_response)
+      doc = RestClient.get(subjects_url)
+      html = Nokogiri::HTML(doc.body)
       if html.css('ul.plain li').first
         instance_variable_set("@policy_area", html.css('ul.plain li').first.text)
         html.css('ul.plain li')[1..-1].map{|r| r.text.strip}

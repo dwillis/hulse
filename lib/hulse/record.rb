@@ -24,24 +24,24 @@ module Hulse
     end
 
     def self.daily_digest(date=nil)
-      doc = HTTParty.get(base_url(date)+'daily-digest')
-      html = Nokogiri::HTML(doc.parsed_response)
+      doc = RestClient.get(base_url(date)+'daily-digest')
+      html = Nokogiri::HTML(doc.body)
       (html/:pre).text
     end
 
     def self.senate(date=nil)
-      doc = HTTParty.get(base_url(date)+'senate-section')
-      create_from_html(Nokogiri::HTML(doc.parsed_response), date, 'senate')
+      doc = RestClient.get(base_url(date)+'senate-section')
+      create_from_html(Nokogiri::HTML(doc.body), date, 'senate')
     end
 
     def self.house(date=nil)
-      doc = HTTParty.get(base_url(date)+'house-section')
-      create_from_html(Nokogiri::HTML(doc.parsed_response), date, 'house')
+      doc = RestClient.get(base_url(date)+'house-section')
+      create_from_html(Nokogiri::HTML(doc.body), date, 'house')
     end
 
     def self.extension_of_remarks(date=nil)
-      doc = HTTParty.get(base_url(date)+'extensions-of-remarks-section')
-      create_from_html(Nokogiri::HTML(doc.parsed_response), date, 'extension')
+      doc = RestClient.get(base_url(date)+'extensions-of-remarks-section')
+      create_from_html(Nokogiri::HTML(doc.body), date, 'extension')
     end
 
     def self.create_from_html(html, date, section)
@@ -102,7 +102,7 @@ module Hulse
     end
 
     def get_text(url)
-      doc = HTTParty.get(url)
+      doc = RestClient.get(url)
       html = Nokogiri::HTML(doc.parsed_response)
       (html/:pre).text.strip.delete!("\n").gsub('          ',' ')
     end

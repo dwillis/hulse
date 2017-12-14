@@ -12,8 +12,8 @@ module Hulse
 
     def self.latest_vote(year)
       url = "http://clerk.house.gov/evs/#{year}/index.asp"
-      response = HTTParty.get(url)
-      doc = Nokogiri::HTML(response.parsed_response)
+      response = RestClient.get(url)
+      doc = Nokogiri::HTML(response.body)
       (doc/:a).first.text.to_i
     end
 

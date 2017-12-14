@@ -15,8 +15,8 @@ module Hulse
 
     def self.presidential
       comms = []
-      doc = HTTParty.get("https://www.congress.gov/communications?q=%7B%22communication-code%22%3A%22PM%22%7D&pageSize=250")
-      html = Nokogiri::HTML(doc.parsed_response)
+      doc = RestClient.get("https://www.congress.gov/communications?q=%7B%22communication-code%22%3A%22PM%22%7D&pageSize=250")
+      html = Nokogiri::HTML(doc.body)
       (html/:ol/:li).each do |row|
         comms << create(row)
       end
@@ -25,8 +25,8 @@ module Hulse
 
     def self.executive
       comms = []
-      doc = HTTParty.get("https://www.congress.gov/communications?q=%7B%22communication-code%22%3A%22EC%22%7D&pageSize=250")
-      html = Nokogiri::HTML(doc.parsed_response)
+      doc = RestClient.get("https://www.congress.gov/communications?q=%7B%22communication-code%22%3A%22EC%22%7D&pageSize=250")
+      html = Nokogiri::HTML(doc.body)
       (html/:ol/:li).each do |row|
         comms << create(row)
       end

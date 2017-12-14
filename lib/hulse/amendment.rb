@@ -10,8 +10,8 @@ module Hulse
     end
 
     def self.fetch(congress, page=1)
-      doc = HTTParty.get("https://www.congress.gov/legislation?pageSize=250&q=%7B%22congress%22%3A%22#{congress}%22%2C%22type%22%3A%22amendments%22%7D&page=#{page}")
-      Nokogiri::HTML(doc.parsed_response)
+      doc = RestClient.get("https://www.congress.gov/legislation?pageSize=250&q=%7B%22congress%22%3A%22#{congress}%22%2C%22type%22%3A%22amendments%22%7D&page=#{page}")
+      Nokogiri::HTML(doc.body)
     end
 
     def self.scrape_page(html)
@@ -100,15 +100,15 @@ module Hulse
 
     def self.scrape_amendments(amendments_url)
       amendments = []
-      doc = HTTParty.get(amendments_url)
-      html = Nokogiri::HTML(doc.parsed_response)
+      doc = RestClient.get(amendments_url)
+      html = Nokogiri::HTML(doc.body)
       return [] if html.css('ol.results_list li').empty?
       total = html.css('strong').first.next.text.strip.split('of ').last.to_i
       max_page = (total.to_f/250.0).round
       amendments << parse_html(html)
       (2..max_page).each do |page|
-        doc = HTTParty.get(amendments_url+"&page=#{page}")
-        html = Nokogiri::HTML(doc.parsed_response)
+        doc = RestClient.get(amendments_url+"&page=#{page}")
+        html = Nokogiri::HTML(doc.body)
         amendments << parse_html(html)
       end
       # process other pages

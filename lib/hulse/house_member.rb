@@ -21,8 +21,8 @@ module Hulse
     def self.congressdotgov(congress)
       results = []
       url = "https://www.congress.gov/sponsors-cosponsors/#{congress.to_i.ordinalize.to_s}-congress/representatives/all"
-      response = HTTParty.get(url)
-      html = Nokogiri::HTML(response.parsed_response)
+      response = RestClient.get(url)
+      html = Nokogiri::HTML(response.body)
       table = (html/:table).first
       (table/:tr)[1..-1].each do |row|
         results << { bioguide_id: row.children[1].children[0]['href'].split('/').last, member_url: (row/:td).first.children.first['href'], sponsored_bills: (row/:td)[1].text.gsub(' Sponsored','').to_i, cosponsored_bills: (row/:td)[2].text.gsub(' Cosponsored','').to_i}

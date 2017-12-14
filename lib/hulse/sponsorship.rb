@@ -22,8 +22,8 @@ module Hulse
     end
 
     def self.fetch(url)
-      doc = HTTParty.get(url)
-      Nokogiri::HTML(doc.parsed_response)
+      doc = RestClient.get(url)
+      Nokogiri::HTML(doc.body)
     end
 
     def self.totals(congress)
@@ -64,13 +64,13 @@ module Hulse
       bioguide_id = url.split('/').last
       sponsorships = parse_html(html, bioguide_id, congress)
       if max_page == 2
-        doc = HTTParty.get(url+"?q=%7B%22congress%22%3A%22#{congress}%22%7D&pageSize=250&page=#{max_page}")
-        html = Nokogiri::HTML(doc.parsed_response)
+        doc = RestClient.get(url+"?q=%7B%22congress%22%3A%22#{congress}%22%7D&pageSize=250&page=#{max_page}")
+        html = Nokogiri::HTML(doc.body)
         sponsorships << parse_html(html, bioguide_id, congress)
       elsif max_page > 2
         (2..max_page).each do |page|
-          doc = HTTParty.get(url+"?q=%7B%22congress%22%3A%22#{congress}%22%7D&pageSize=250&page=#{page}")
-          html = Nokogiri::HTML(doc.parsed_response)
+          doc = RestClient.get(url+"?q=%7B%22congress%22%3A%22#{congress}%22%7D&pageSize=250&page=#{page}")
+          html = Nokogiri::HTML(doc.body)
           sponsorships << parse_html(html, bioguide_id, congress)
         end
       end
