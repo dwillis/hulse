@@ -14,6 +14,10 @@ module Hulse
       end
     end
 
+    def to_s
+      number
+    end
+
     def self.create(url)
       html = fetch(url)
       scrape_page(html)
@@ -22,7 +26,7 @@ module Hulse
     def self.scrape_page(html)
       self.new(
         congress: html.css("#report ul li a").first['href'].split('/')[1],
-        chamber: html.css("h1").first.text.first == 'H' ? 'House' : 'Senate'
+        chamber: html.css("h1").first.text[0] == 'H' ? 'House' : 'Senate',
         number: html.css("h1").first.children[0].text.split(' - ')[0],
         title: html.css("h1").first.children[0].text.split(' - ')[1],
         pdf_url: "https://www.congress.gov" + html.css("#report ul li a").first['href'],
