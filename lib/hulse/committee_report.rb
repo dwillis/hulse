@@ -24,8 +24,22 @@ module Hulse
     end
 
     def self.scrape_page(html)
-      committee = html.css("td a")[1] ? html.css("td a")[1].text : nil
-      committee_code = html.css("td a")[1] ? html.css("td a")[1]['href'].split('/').last.upcase : nil
+      if html.css("td a").detect{|a| a['href'].include?('/committee/')}
+        committee =  html.css("td a").detect{|a| a['href'].include?('/committee/')}.text
+        committee_code = html.css("td a").detect{|a| a['href'].include?('/committee/')}['href'].split('/').last.upcase
+      else
+        committee = nil
+        committee_code = nil
+      end
+
+      if html.css("td a").detect{|a| a['href'].include?('/bill/')}
+        bill =  html.css("td a").detect{|a| a['href'].include?('/bill/')}.text
+        bill_url = html.css("td a").detect{|a| a['href'].include?('/bill/')}['href']
+      else
+        bill = nil
+        bill_url = nil
+      end
+
       self.new(
         congress: html.css("#report ul li a").first['href'].split('/')[1],
         chamber: html.css("h1").first.text[0] == 'H' ? 'House' : 'Senate',
@@ -34,8 +48,8 @@ module Hulse
         pdf_url: "https://www.congress.gov" + html.css("#report ul li a").first['href'],
         committee: committee,
         committee_code: committee_code,
-        bill: html.css("td a").first.text,
-        bill_url: html.css("td a").first['href'],
+        bill: bill,
+        bill_url: bill_url,
         text: html.css("pre").text
       )
     end
