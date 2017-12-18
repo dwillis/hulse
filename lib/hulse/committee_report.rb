@@ -24,17 +24,19 @@ module Hulse
     end
 
     def self.scrape_page(html)
+      committee = html.css("td a")[1] ? html.css("td a")[1].text : nil
+      committee_code = html.css("td a")[1] ? html.css("td a")[1]['href'].split('/').last.upcase : nil
       self.new(
         congress: html.css("#report ul li a").first['href'].split('/')[1],
         chamber: html.css("h1").first.text[0] == 'H' ? 'House' : 'Senate',
         number: html.css("h1").first.children[0].text.split(' - ')[0],
         title: html.css("h1").first.children[0].text.split(' - ')[1],
         pdf_url: "https://www.congress.gov" + html.css("#report ul li a").first['href'],
-        committee: html.css("td a")[1].text,
-        committee_code: html.css("td a")[1]['href'].split('/').last.upcase,
+        committee: committee,
+        committee_code: committee_code,
         bill: html.css("td a").first.text,
         bill_url: html.css("td a").first['href'],
-        text: html.css("pre")
+        text: html.css("pre").text
       )
     end
 
