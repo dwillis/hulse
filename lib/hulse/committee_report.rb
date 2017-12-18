@@ -1,7 +1,7 @@
 module Hulse
   class CommitteeReport
 
-    attr_reader :congress, :chamber, :title, :number, :committee, :committee_code, :bill, :bill_url, :text, :pdf_url
+    attr_reader :congress, :chamber, :title, :url, :number, :committee, :committee_code, :bill, :bill_url, :text, :pdf_url
 
     def self.fetch(url)
       doc = RestClient.get(url)
@@ -19,11 +19,16 @@ module Hulse
     end
 
     def self.create(url)
-      html = fetch(url)
-      scrape_page(html)
+      scrape_page(url)
     end
 
-    def self.scrape_page(html)
+    def self.scrape_page(url)
+      html = fetch(url)
+      if url.split('/').last[0] == '2'
+        report_number = html.css("h1").first.children[0].text.split(' - ')[0] + "-2"
+      else
+        report_number = html.css("h1").first.children[0].text.split(' - ')[0]
+      end
       if html.css("td a").detect{|a| a['href'].include?('/committee/')}
         committee =  html.css("td a").detect{|a| a['href'].include?('/committee/')}.text
         committee_code = html.css("td a").detect{|a| a['href'].include?('/committee/')}['href'].split('/').last.upcase
@@ -43,8 +48,9 @@ module Hulse
       self.new(
         congress: html.css("#report ul li a").first['href'].split('/')[1],
         chamber: html.css("h1").first.text[0] == 'H' ? 'House' : 'Senate',
-        number: html.css("h1").first.children[0].text.split(' - ')[0],
+        number: report_number,
         title: html.css("h1").first.children[0].text.split(' - ')[1],
+        url: url.split('?').first,
         pdf_url: "https://www.congress.gov" + html.css("#report ul li a").first['href'],
         committee: committee,
         committee_code: committee_code,
