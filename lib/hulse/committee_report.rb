@@ -51,13 +51,21 @@ module Hulse
         bill_url = nil
       end
 
+      if html.css("#report ul li a").empty?
+        congress = url.split('/')[4][0..2]
+        pdf_url = nil
+      else
+        congress = html.css("#report ul li a").first['href'].split('/')[1]
+        pdf_url = "https://www.congress.gov" + html.css("#report ul li a").first['href']
+      end
+
       self.new(
-        congress: html.css("#report ul li a").first['href'].split('/')[1],
+        congress: congress,
         chamber: html.css("h1").first.text[0] == 'H' ? 'House' : 'Senate',
         number: report_number,
         title: html.css("h1").first.children[0].text.split(' - ')[1],
         url: url.split('?').first,
-        pdf_url: "https://www.congress.gov" + html.css("#report ul li a").first['href'],
+        pdf_url: pdf_url,
         committee: committee,
         committee_code: committee_code,
         bill: bill,
