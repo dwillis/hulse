@@ -24,16 +24,8 @@ module Hulse
 
     def self.scrape_page(url)
       html = fetch(url)
-      if url.split('/').last[0] == '6'
-        report_number = html.css("h1").first.children[0].text.split(' - ')[0] + "-6"
-      elsif url.split('/').last[0] == '5'
-        report_number = html.css("h1").first.children[0].text.split(' - ')[0] + "-5"
-      elsif url.split('/').last[0] == '4'
-        report_number = html.css("h1").first.children[0].text.split(' - ')[0] + "-4"
-      elsif url.split('/').last[0] == '3'
-        report_number = html.css("h1").first.children[0].text.split(' - ')[0] + "-3"
-      elsif url.split('/').last[0] == '2'
-        report_number = html.css("h1").first.children[0].text.split(' - ')[0] + "-2"
+      if url.split('/').last[0].to_i > 1
+        report_number = html.css("h1").first.children[0].text.split(' - ')[0] + "-#{url.split('/').last[0]}"
       else
         report_number = html.css("h1").first.children[0].text.split(' - ')[0]
       end
