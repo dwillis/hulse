@@ -17,7 +17,7 @@ module Hulse
       comms = []
       doc = RestClient.get("https://www.congress.gov/communications?q=%7B%22communication-code%22%3A%22PM%22%7D&pageSize=250&page=#{page}")
       html = Nokogiri::HTML(doc.body)
-      (html/:ol/:li).each do |row|
+      html.css('ol li[@class="expanded"]').each do |row|
         comms << create(row)
       end
       comms
@@ -27,7 +27,7 @@ module Hulse
       comms = []
       doc = RestClient.get("https://www.congress.gov/communications?q=%7B%22communication-code%22%3A%22EC%22%7D&pageSize=250&page=#{page}")
       html = Nokogiri::HTML(doc.body)
-      (html/:ol/:li).each do |row|
+      html.css('ol li[@class="expanded"]').each do |row|
         comms << create(row)
       end
       comms
@@ -37,8 +37,9 @@ module Hulse
       comms = []
       doc = RestClient.get("https://www.congress.gov/search?q={%22source%22:%22house-communications%22}&pageSize=250&page=#{page}&pageSort=crDateDesc")
       html = Nokogiri::HTML(doc.body)
-      (html/:ol/:li).each do |row|
-        comms << create_house(row)
+      html.css('ol li[@class="expanded"]').each do |row|
+        puts row.children[3].children[0].text
+        comms << Hulse::Communication.create_house(row)
       end
       comms
     end
@@ -47,7 +48,7 @@ module Hulse
       comms = []
       doc = RestClient.get("https://www.congress.gov/search?pageSize=250&q=%7B%22source%22%3A%22senate-communications%22%7D&page=#{page}&pageSort=crDateDesc")
       html = Nokogiri::HTML(doc.body)
-      (html/:ol/:li).each do |row|
+      html.css('ol li[@class="expanded"]').each do |row|
         comms << create_senate(row)
       end
       comms
@@ -56,9 +57,9 @@ module Hulse
     def self.create(row)
       self.new(id: row.children[3].children[0].text,
         date: Date.strptime(row.children[3].children[1].text.split[1], "%m/%d/%Y"),
-        committee: row.children[3].children[1].text.split[3] + ' ' + row.children[3].children[1].text.split[4],
-        url: (row/:h2).first.children.find(:a).first['href'],
-        text: row.children[4].text.strip
+        committee: row.children[3].children[2].text,
+        url: row.children[3].children[0]['href'],
+        text: row.children[5].text
       )
     end
 
@@ -69,7 +70,7 @@ module Hulse
         text: row.children[5].text,
         url: row.children[3].children[0]['href'],
         requirement: row.children[7].text.split(': ').last,
-        requirement_url: "https://www.congress.gov/house-communication-requirement/#{row.children[7].text.split(': ').last.gsub('R','')}"
+        requirement_url: row.children[7].text.split(': ').last.nil? ? nil : "https://www.congress.gov/house-communication-requirement/#{row.children[7].text.split(': ').last.gsub('R','')}"
       )
     end
 
@@ -78,9 +79,7 @@ module Hulse
         date: Date.strptime(row.children[3].children[1].text.split[1], "%m/%d/%Y"),
         committee: row.children[3].children[2].text,
         text: row.children[5].text,
-        url: row.children[3].children[0]['href'],
-        requirement: row.children[7].text.split(': ').last,
-        requirement_url: "https://www.congress.gov/house-communication-requirement/#{row.children[7].text.split(': ').last.gsub('R','')}"
+        url: row.children[3].children[0]['href']
       )
     end
 
