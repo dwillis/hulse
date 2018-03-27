@@ -38,7 +38,6 @@ module Hulse
       doc = RestClient.get("https://www.congress.gov/search?q={%22source%22:%22house-communications%22}&pageSize=250&page=#{page}&pageSort=crDateDesc")
       html = Nokogiri::HTML(doc.body)
       html.css('ol li[@class="expanded"]').each do |row|
-        puts row.children[3].children[0].text
         comms << Hulse::Communication.create_house(row)
       end
       comms
@@ -57,7 +56,7 @@ module Hulse
     def self.create(row)
       self.new(id: row.children[3].children[0].text,
         date: Date.strptime(row.children[3].children[1].text.split[1], "%m/%d/%Y"),
-        committee: row.children[3].children[2].text,
+        committee: row.children[3].children[2].nil? ? nil : row.children[3].children[2].text,
         url: row.children[3].children[0]['href'],
         text: row.children[5].text
       )
@@ -66,7 +65,7 @@ module Hulse
     def self.create_house(row)
       self.new(id: row.children[3].children[0].text,
         date: Date.strptime(row.children[3].children[1].text.split[1], "%m/%d/%Y"),
-        committee: row.children[3].children[2].text,
+        committee: row.children[3].children[2].nil? ? nil : row.children[3].children[2].text,
         text: row.children[5].text,
         url: row.children[3].children[0]['href'],
         requirement: row.children[7].text.split(': ').last,
@@ -77,7 +76,7 @@ module Hulse
     def self.create_senate(row)
       self.new(id: row.children[3].children[0].text,
         date: Date.strptime(row.children[3].children[1].text.split[1], "%m/%d/%Y"),
-        committee: row.children[3].children[2].text,
+        committee: row.children[3].children[2].nil? ? nil : row.children[3].children[2].text,
         text: row.children[5].text,
         url: row.children[3].children[0]['href']
       )
