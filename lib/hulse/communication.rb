@@ -57,7 +57,7 @@ module Hulse
       self.new(id: row.children[3].children[0].text,
         date: Date.strptime(row.children[3].children[1].text.split[1], "%m/%d/%Y"),
         committee: row.children[3].children[2].nil? ? nil : row.children[3].children[2].text,
-        url: row.children[3].children[0]['href'],
+        url: row.children[3].children[0]['href'].split('?')[0],
         text: row.children[5].text
       )
     end
@@ -67,7 +67,7 @@ module Hulse
         date: Date.strptime(row.children[3].children[1].text.split[1], "%m/%d/%Y"),
         committee: row.children[3].children[2].nil? ? nil : row.children[3].children[2].text,
         text: row.children[5].text,
-        url: row.children[3].children[0]['href'],
+        url: row.children[3].children[0]['href'].split('?')[0],
         requirement: row.children[7].text.split(': ').last,
         requirement_url: row.children[7].text.split(': ').last.nil? ? nil : "https://www.congress.gov/house-communication-requirement/#{row.children[7].text.split(': ').last.gsub('R','')}"
       )
@@ -78,7 +78,7 @@ module Hulse
         date: Date.strptime(row.children[3].children[1].text.split[1], "%m/%d/%Y"),
         committee: row.children[3].children[2].nil? ? nil : row.children[3].children[2].text,
         text: row.children[5].text,
-        url: row.children[3].children[0]['href']
+        url: row.children[3].children[0]['href'].split('?')[0]
       )
     end
 
