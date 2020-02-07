@@ -32,13 +32,21 @@ module Hulse
       end
       if response['document'].is_a? Array
         doc = response['document'].first
-      else
+        doc = doc.inject({}){|memo,(k,v)| memo[k.to_sym] = v; memo}
+      elsif response['document'].is_a? Hash
         doc = response['document']
+        doc = doc.inject({}){|memo,(k,v)| memo[k.to_sym] = v; memo}
+      else
+        doc = nil
       end
       if response['amendment'].is_a? Array
         amend = response['amendment'].first
-      else
+        amend = amend.inject({}){|memo,(k,v)| memo[k.to_sym] = v; memo}
+      elsif response['amendment'].is_a? Hash
         amend = response['amendment']
+        amend = amend.inject({}){|memo,(k,v)| memo[k.to_sym] = v; memo}
+      else
+        amend = nil
       end
       self.new(congress: response['congress'].to_i,
         session: response['session'].to_i,
@@ -53,8 +61,8 @@ module Hulse
         vote_title: response['vote_title'],
         majority_requirement: response['majority_requirement'],
         vote_result: response['vote_result'],
-        document: doc.inject({}){|memo,(k,v)| memo[k.to_sym] = v; memo},
-        amendment: amend.inject({}){|memo,(k,v)| memo[k.to_sym] = v; memo},
+        document: doc,
+        amendment: amend,
         vote_count: response['count'].inject({}){|memo,(k,v)| memo[k.to_sym] = v; memo},
         tie_breaker: response['tie_breaker'].inject({}){|memo,(k,v)| memo[k.to_sym] = v; memo},
         members: members
