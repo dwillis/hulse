@@ -28,4 +28,5 @@ Gem::Specification.new do |spec|
   spec.add_dependency "activesupport"
   spec.add_dependency "memoist"
   spec.add_dependency "rest-client"
+  spec.add_dependency "htmlentities"
 end
