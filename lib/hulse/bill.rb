@@ -86,7 +86,7 @@ module Hulse
       return [nil, nil] if table.css('tr').detect{|row| row.children[1].text == 'Latest Action:'}.children[3].children.first.text.strip == 'Action data to be retrieved.'
       return [nil, nil] if table.css('tr').detect{|row| row.children[1].text == 'Latest Action:'}.children[3].children.first.text.strip == 'There is no latest action for this bill'
       text = table.css('tr').detect{|row| row.children[1].text == 'Latest Action:'}.children[3].children.first.text.split("(").first.strip
-      date = Date.strptime(table.css('tr').detect{|row| row.children[1].text == 'Latest Action:'}.children[3].children.first.text.split[2], '%m/%d/%Y')
+      date = Date.parse(table.css('tr').detect{|row| row.children[1].text == 'Latest Action:'}.children[3].children.first.text, '%m/%d/%Y')
       [text, date]
     end
 
