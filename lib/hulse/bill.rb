@@ -241,7 +241,7 @@ module Hulse
     end
 
     def amendments_url
-      url + '/amendments?pageSize=250'
+      url + '/amendments?pageSize=250&searchResultViewType=expanded'
     end
 
     def amendments
