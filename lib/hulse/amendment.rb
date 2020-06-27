@@ -14,6 +14,11 @@ module Hulse
       Nokogiri::HTML(doc.body)
     end
 
+    def self.fetch_detail(url)
+      doc = RestClient.get(url)
+      Nokogiri::HTML(doc.body)
+    end
+
     def self.scrape_page(html)
       results = []
       html.css('ol.results_list h2').each do |amdt|
@@ -78,20 +83,17 @@ module Hulse
 
     def self.parse_html(html)
       amendments = []
-      html.css('ol.results_list li').each do |row|
-        headers = row.css('tr').map{|r| r.css('th').text}
-        if headers.size > 1
-          td = 1
-          purpose = row.css('tr').first.css('td').text.strip
-        else
-          td = 0
-          purpose = nil
-        end
-        offered_date = get_offered_date(row, td)
-        latest_action_date, latest_action_text = get_latest_action_date_and_text(row, td)
-        bioguide, party, state = get_bioguide_party_and_state(row, td)
-        amendments << { url: row.css('h2').first.children.first['href'], number: row.css('h2').first.children.first.text, sponsor_url: row.css('td')[td].children.first['href'],
-        sponsor_bioguide: bioguide , sponsor_party: party, sponsor_state: state, sponsor_name: row.css('td')[td].children.first.children.text, offered_date: offered_date, latest_action_text: latest_action_text, latest_action_date: latest_action_date,
+      html.css('div#main ol li.expanded').each do |row|
+        puts row.css('a').first.text
+        purpose = row.css('.result-item').first.children.last.text.strip
+        offered_date = Date.strptime row.css('.result-item')[1].children.last.text.strip.split.last.gsub(')',''), "%m/%d/%Y"
+        bioguide = row.css('.result-item')[1].children[2]['href'].split('/').last
+        party = row.css('.result-item')[1].children[2].text.split('[').last.split('-').first
+        state = row.css('.result-item')[1].children[2].text.split('[').last.split('-')[1]
+        latest_action_date = Date.strptime(row.css('.result-item')[2].children[1].text.split.first, "%m/%d/%y")
+        latest_action_text = row.css('.result-item')[2].children[1].text
+        amendments << { url: row.css('a').first['href'].split('?').first, number: row.css('a').first.text, sponsor_url: row.css('.result-item')[1].children[2]['href'],
+        sponsor_bioguide: bioguide , sponsor_party: party, sponsor_state: state, sponsor_name: row.css('.result-item')[1].children[2].text.split(' [').first, offered_date: offered_date, latest_action_text: latest_action_text, latest_action_date: latest_action_date,
         purpose: purpose
         }
       end
@@ -102,7 +104,7 @@ module Hulse
       amendments = []
       doc = RestClient.get(amendments_url)
       html = Nokogiri::HTML(doc.body)
-      return [] if html.css('ol.results_list li').empty?
+      return [] if html.css('div#main ol li.expanded').empty?
       total = html.css('strong').first.next.text.strip.split('of ').last.to_i
       max_page = (total.to_f/250.0).round
       amendments << parse_html(html)
