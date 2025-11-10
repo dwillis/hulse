@@ -14,7 +14,7 @@ module Hulse
       url = "http://clerk.house.gov/evs/#{year}/index.asp"
       response = RestClient.get(url)
       doc = Nokogiri::HTML(response.body)
-      (doc/:a).first.text.to_i
+      doc.css('a').first.text.to_i
     end
 
     def self.find(year, vote)

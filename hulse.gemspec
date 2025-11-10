@@ -1,5 +1,5 @@
 # coding: utf-8
-lib = File.expand_path('../lib', __FILE__)
+lib = File.expand_path('lib', __dir__)
 $LOAD_PATH.unshift(lib) unless $LOAD_PATH.include?(lib)
 require 'hulse/version'
 
@@ -12,6 +12,7 @@ Gem::Specification.new do |spec|
   spec.description   = %q{Turns House and Senate votes and members into Ruby objects for your legislative pleasure.}
   spec.homepage      = ""
   spec.license       = "MIT"
+  spec.required_ruby_version = '>= 3.3.0'
 
   spec.files         = `git ls-files`.split($/)
   spec.executables   = spec.files.grep(%r{^bin/}) { |f| File.basename(f) }

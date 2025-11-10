@@ -29,9 +29,9 @@ module Hulse
       url = "https://www.congress.gov/sponsors-cosponsors/#{congress.to_i.ordinalize.to_s}-congress/senators/all"
       response = RestClient.get(url)
       html = Nokogiri::HTML(response.body)
-      table = (html/:table).first
-      (table/:tr)[2..-1].each do |row|
-        results << { bioguide_id: (row/:td).first.children.first['href'].split('/').last, member_url: (row/:td).first.children.first['href'], sponsored_bills: (row/:td)[1].text.to_i, sponsored_amendments: (row/:td)[2].text.to_i, cosponsored_bills: (row/:td)[3].text.to_i, cosponsored_bills_withdrawn: (row/:td)[5].text.to_i, cosponsored_amendments: (row/:td)[6].text.to_i, cosponsored_amendments_withdrawn: (row/:td)[8].text.to_i}
+      table = html.css('table').first
+      table.css('tr')[2..-1].each do |row|
+        results << { bioguide_id: row.css('td').first.children.first['href'].split('/').last, member_url: row.css('td').first.children.first['href'], sponsored_bills: row.css('td')[1].text.to_i, sponsored_amendments: row.css('td')[2].text.to_i, cosponsored_bills: row.css('td')[3].text.to_i, cosponsored_bills_withdrawn: row.css('td')[5].text.to_i, cosponsored_amendments: row.css('td')[6].text.to_i, cosponsored_amendments_withdrawn: row.css('td')[8].text.to_i}
       end
       results
     end

@@ -26,7 +26,7 @@ module Hulse
     def self.daily_digest(date=nil)
       doc = RestClient.get(base_url(date)+'daily-digest')
       html = Nokogiri::HTML(doc.body)
-      (html/:pre).text
+      html.css('pre').text
     end
 
     def self.senate(date=nil)
@@ -54,7 +54,7 @@ module Hulse
     end
 
     def self.topics(html)
-      (html/:td).map{|d| d.children[1]}.compact.map{|l| {url: l['href'], title: l.text.strip}}
+      html.css('td').map{|d| d.children[1]}.compact.map{|l| {url: l['href'], title: l.text.strip}}
     end
 
     def has_senate_explanations?
@@ -104,7 +104,7 @@ module Hulse
     def get_text(url)
       doc = RestClient.get(url)
       html = Nokogiri::HTML(doc.parsed_response)
-      (html/:pre).text.strip.delete!("\n").gsub('          ',' ')
+      html.css('pre').text.strip.delete!("\n").gsub('          ',' ')
     end
 
   end
