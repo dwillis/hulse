@@ -1,6 +1,6 @@
 # Hulse
 
-Hulse is a Ruby gem for accessing raw data and information published by and about the U.S. Congress. It works using Ruby 1.9.3, 2.0, 2.1 and 2.2. It is not a wrapper for existing non-governmental APIs of congressional information. Instead, it loads, parses and scrapes official sources.
+Hulse is a Ruby gem for accessing raw data and information published by and about the U.S. Congress. It requires Ruby 3.3 or higher. It is not a wrapper for existing non-governmental APIs of congressional information. Instead, it loads, parses and scrapes official sources.
 
 Hulse can be used to get House and Senate roll call votes from the official sources on [house.gov](http://clerk.house.gov/evs/2013/index.asp) and [senate.gov](http://www.senate.gov/pagelayout/legislative/a_three_sections_with_teasers/votes.htm).
 

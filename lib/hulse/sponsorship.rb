@@ -29,14 +29,14 @@ module Hulse
     def self.totals(congress)
       results = []
       house = fetch(house_url(congress))
-      table = (house/:table).first
-      (table/:tr)[1..-1].each do |row|
-        results << { bioguide_id: (row/:td).first.children.first['href'].split('/').last, member_url: (row/:td).first.children.first['href'], sponsored_bills: (row/:td)[1].text.gsub(' Sponsored','').to_i, cosponsored_bills: (row/:td)[2].text.gsub(' Cosponsored','').to_i}
+      table = house.css('table').first
+      table.css('tr')[1..-1].each do |row|
+        results << { bioguide_id: row.css('td').first.children.first['href'].split('/').last, member_url: row.css('td').first.children.first['href'], sponsored_bills: row.css('td')[1].text.gsub(' Sponsored','').to_i, cosponsored_bills: row.css('td')[2].text.gsub(' Cosponsored','').to_i}
       end
       senate = fetch(senate_url(congress))
-      table = (senate/:table).first
-      (table/:tr)[1..-1].each do |row|
-        results << { bioguide_id: (row/:td).first.children.first['href'].split('/').last, member_url: (row/:td).first.children.first['href'], sponsored_bills: (row/:td)[1].text.gsub(' Sponsored','').to_i, cosponsored_bills: (row/:td)[2].text.gsub(' Cosponsored','').to_i}
+      table = senate.css('table').first
+      table.css('tr')[1..-1].each do |row|
+        results << { bioguide_id: row.css('td').first.children.first['href'].split('/').last, member_url: row.css('td').first.children.first['href'], sponsored_bills: row.css('td')[1].text.gsub(' Sponsored','').to_i, cosponsored_bills: row.css('td')[2].text.gsub(' Cosponsored','').to_i}
       end
       results
     end
