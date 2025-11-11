@@ -85,8 +85,10 @@ module Hulse
     def self.get_latest_action(table)
       return [nil, nil] if table.css('tr').detect{|row| row.children[1].text == 'Latest Action:'}.children[3].children.first.text.strip == 'Action data to be retrieved.'
       return [nil, nil] if table.css('tr').detect{|row| row.children[1].text == 'Latest Action:'}.children[3].children.first.text.strip == 'There is no latest action for this bill'
-      text = table.css('tr').detect{|row| row.children[1].text == 'Latest Action:'}.children[3].children.first.text.split("(").first.strip
-      date = Date.parse(table.css('tr').detect{|row| row.children[1].text == 'Latest Action:'}.children[3].children.first.text, '%m/%d/%Y')
+      full_text = table.css('tr').detect{|row| row.children[1].text == 'Latest Action:'}.children[3].children.first.text
+      text = full_text.split("(").first.strip
+      date_str = full_text.scan(/\((\d+\/\d+\/\d+)\)/).first&.first
+      date = date_str ? Date.strptime(date_str, '%m/%d/%Y') : nil
       [text, date]
     end
 

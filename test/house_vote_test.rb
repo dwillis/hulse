@@ -11,7 +11,7 @@ module Hulse
 
     def test_bill_url
       assert_equal @hv.bill_url, "https://www.congress.gov/bill/114th-congress/house-bill/1853"
-      assert_equal @sv.bill_url, nil
+      assert_nil @sv.bill_url
     end
 
   end
